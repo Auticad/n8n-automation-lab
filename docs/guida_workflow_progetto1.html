@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guida Workflow · Progetto1</title>
+<style>
+  :root {
+    --indigo: #4f46e5;
+    --indigo-light: #eef2ff;
+    --indigo-border: #c7d2fe;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --green-border: #bbf7d0;
+    --purple: #7c3aed;
+    --purple-light: #faf5ff;
+    --purple-border: #e9d5ff;
+    --orange: #ea580c;
+    --orange-light: #fff7ed;
+    --orange-border: #fed7aa;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --blue-border: #bfdbfe;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --teal: #0d9488;
+    --teal-light: #f0fdfa;
+    --teal-border: #99f6e4;
+    --gray-900: #111827;
+    --gray-700: #374151;
+    --gray-500: #6b7280;
+    --gray-200: #e5e7eb;
+    --gray-100: #f3f4f6;
+    --gray-50: #f9fafb;
+    --navy: #1e3a5f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--gray-700);
+    background: #eef0f4;
+    padding: 32px 16px;
+  }
+
+  .page {
+    max-width: 920px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 32px rgba(0,0,0,.09);
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  .page-header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4f82 100%);
+    padding: 44px 52px 40px;
+    color: #fff;
+  }
+  .page-header .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #93c5fd;
+    margin-bottom: 10px;
+  }
+  .page-header h1 { font-size: 38px; font-weight: 800; color: #fff; line-height: 1.15; }
+  .page-header .sub { margin-top: 8px; font-size: 15px; color: #bfdbfe; }
+  .page-header .meta {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .page-header .meta span {
+    font-size: 12px;
+    color: #93c5fd;
+    background: rgba(255,255,255,.12);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.15);
+  }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--blue-light);
+    border-bottom: 1px solid var(--blue-border);
+    padding: 18px 52px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .toc a {
+    font-size: 12.5px;
+    color: var(--blue);
+    text-decoration: none;
+    padding: 4px 13px;
+    border-radius: 20px;
+    background: #fff;
+    border: 1px solid var(--blue-border);
+    transition: all .15s;
+    font-weight: 500;
+  }
+  .toc a:hover { background: var(--blue-border); }
+
+  /* ── CONTENT ── */
+  .content { padding: 52px; }
+  section { margin-bottom: 56px; }
+
+  .section-title {
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--navy);
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--blue-border);
+    margin-bottom: 26px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title .num {
+    background: var(--navy);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: .02em;
+  }
+
+  p { margin-bottom: 14px; color: var(--gray-700); }
+
+  /* ── SCHEMA ── */
+  .schema-wrap {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 28px 20px;
+    overflow-x: auto;
+  }
+  .schema-wrap svg { display: block; width: 100%; max-width: 820px; margin: 0 auto; }
+
+  /* ── FLOW TABLE ── */
+  .flow-table { width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; }
+  .flow-table th {
+    background: var(--navy);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 10px 16px;
+    text-align: left;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .flow-table td {
+    padding: 11px 16px;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--gray-200);
+    vertical-align: top;
+  }
+  .flow-table tr:last-child td { border-bottom: none; }
+  .flow-table tr:nth-child(even) td { background: var(--gray-50); }
+  .flow-table .step-num { font-weight: 800; color: var(--blue); font-size: 14px; }
+  .flow-table .node-name { font-weight: 700; color: var(--gray-900); }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: .04em;
+    vertical-align: middle;
+    margin-left: 6px;
+    text-transform: uppercase;
+  }
+  .badge-trigger  { background: #e0e7ff; color: #3730a3; }
+  .badge-process  { background: #dcfce7; color: #15803d; }
+  .badge-ai       { background: #f3e8ff; color: #6b21a8; }
+  .badge-output   { background: #fde68a; color: #92400e; }
+  .badge-storage  { background: #ccfbf1; color: #0f766e; }
+
+  /* ── NODE CARDS ── */
+  .node-card {
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  }
+  .node-card-header {
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .node-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .node-info .name { font-size: 15.5px; font-weight: 800; color: var(--gray-900); }
+  .node-info .type { font-size: 11px; color: var(--gray-500); font-family: 'SF Mono','Fira Code',monospace; margin-top: 2px; }
+
+  /* Temi colore */
+  .nc-trigger .node-card-header  { background: var(--indigo-light); border-bottom: 1px solid var(--indigo-border); }
+  .nc-trigger .node-icon          { background: var(--indigo); color: #fff; }
+  .nc-extract .node-card-header  { background: var(--green-light); border-bottom: 1px solid var(--green-border); }
+  .nc-extract .node-icon          { background: var(--green); color: #fff; }
+  .nc-http .node-card-header     { background: var(--purple-light); border-bottom: 1px solid var(--purple-border); }
+  .nc-http .node-icon             { background: var(--purple); color: #fff; }
+  .nc-convert .node-card-header  { background: var(--orange-light); border-bottom: 1px solid var(--orange-border); }
+  .nc-convert .node-icon          { background: var(--orange); color: #fff; }
+  .nc-drive .node-card-header    { background: var(--teal-light); border-bottom: 1px solid var(--teal-border); }
+  .nc-drive .node-icon            { background: var(--teal); color: #fff; }
+
+  /* ── PARAMS TABLE ── */
+  .params { width: 100%; border-collapse: collapse; }
+  .params th {
+    background: var(--gray-100);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+    text-align: left;
+    padding: 8px 18px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .params td {
+    padding: 10px 18px;
+    font-size: 13px;
+    border-top: 1px solid var(--gray-200);
+    vertical-align: top;
+  }
+  .params td:first-child { font-weight: 600; color: var(--gray-700); width: 34%; }
+  .params td:last-child  { color: var(--gray-700); word-break: break-word; }
+  .params tr:nth-child(even) td { background: var(--gray-50); }
+  code {
+    font-family: 'SF Mono','Fira Code','Courier New',monospace;
+    font-size: 11.5px;
+    background: #f1f5f9;
+    color: var(--blue);
+    padding: 2px 6px;
+    border-radius: 4px;
+    word-break: break-all;
+  }
+
+  /* ── JSON BOX ── */
+  .json-box {
+    background: #0f172a;
+    border-radius: 0 0 10px 10px;
+    padding: 18px 22px;
+    font-family: 'SF Mono','Fira Code','Courier New',monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+  .json-box .kw  { color: #38bdf8; }
+  .json-box .str { color: #86efac; }
+  .json-box .expr { color: #fbbf24; font-weight: 600; }
+  .json-box .cmt  { color: #64748b; font-style: italic; }
+
+  /* ── CONCEPT BOXES ── */
+  .concept {
+    border-left: 4px solid var(--blue);
+    background: var(--blue-light);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 13.5px;
+  }
+  .concept strong { display: block; color: var(--navy); margin-bottom: 3px; font-size: 14px; }
+  .concept.tip  { border-color: var(--green); background: var(--green-light); }
+  .concept.warn { border-color: var(--orange); background: var(--orange-light); }
+
+  /* ── CONNECTIONS ── */
+  .conn-table { width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; }
+  .conn-table th { background: var(--navy); color: #fff; font-size: 11.5px; padding: 10px 16px; text-align: left; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .conn-table td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+  .conn-table tr:last-child td { border-bottom: none; }
+  .conn-table tr:nth-child(even) td { background: var(--gray-50); }
+  .conn-type { font-size: 11px; font-family: monospace; color: var(--blue); background: var(--blue-light); padding: 2px 8px; border-radius: 10px; }
+  .arrow { color: var(--gray-500); font-size: 18px; }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    background: var(--gray-100);
+    border-top: 1px solid var(--gray-200);
+    padding: 18px 52px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="label">Guida didattica · Workflow n8n</div>
+    <h1>Progetto1</h1>
+    <div class="sub">Generazione immagini con Gemini AI e salvataggio su Google Drive</div>
+    <div class="meta">
+      <span>ID: lGuapSUkNEGhbx1B</span>
+      <span>5 nodi</span>
+      <span>Flusso lineare</span>
+      <span>28 maggio 2026</span>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <nav class="toc">
+    <a href="#panoramica">1. Panoramica</a>
+    <a href="#schema">2. Schema</a>
+    <a href="#nodi">3. Nodi</a>
+    <a href="#connessioni">4. Connessioni</a>
+    <a href="#concetti">5. Concetti chiave</a>
+  </nav>
+
+  <div class="content">
+
+    <!-- ── 1. PANORAMICA ── -->
+    <section id="panoramica">
+      <div class="section-title"><span class="num">1</span> Panoramica</div>
+      <p>L'utente carica una fotografia e inserisce un prompt testuale tramite un form web. Il workflow estrae i dati binari dell'immagine, li invia all'API Gemini che genera una nuova immagine elaborata, converte la risposta in file binario e la salva automaticamente su Google Drive in una cartella dedicata.</p>
+
+      <table class="flow-table">
+        <thead>
+          <tr><th style="width:5%">#</th><th style="width:28%">Nodo</th><th style="width:20%">Tipo</th><th>Funzione</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="step-num">1</td>
+            <td class="node-name">On form submission <span class="badge badge-trigger">Trigger</span></td>
+            <td>Form Trigger</td>
+            <td>Avvia il workflow raccogliendo l'immagine caricata e il prompt testuale</td>
+          </tr>
+          <tr>
+            <td class="step-num">2</td>
+            <td class="node-name">Extract from File <span class="badge badge-process">Elaborazione</span></td>
+            <td>Extract from File</td>
+            <td>Converte il file binario caricato in una stringa base64 utilizzabile nell'API</td>
+          </tr>
+          <tr>
+            <td class="step-num">3</td>
+            <td class="node-name">HTTP Request <span class="badge badge-ai">AI</span></td>
+            <td>HTTP Request</td>
+            <td>Chiama la Gemini API inviando immagine + prompt, riceve l'immagine generata</td>
+          </tr>
+          <tr>
+            <td class="step-num">4</td>
+            <td class="node-name">Convert to File <span class="badge badge-output">Conversione</span></td>
+            <td>Convert to File</td>
+            <td>Estrae la stringa base64 dalla risposta Gemini e la riconverte in file binario PNG</td>
+          </tr>
+          <tr>
+            <td class="step-num">5</td>
+            <td class="node-name">Upload file <span class="badge badge-storage">Storage</span></td>
+            <td>Google Drive</td>
+            <td>Carica il file PNG nella cartella Google Drive con nome timestamp automatico</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── 2. SCHEMA ── -->
+    <section id="schema">
+      <div class="section-title"><span class="num">2</span> Schema del flusso</div>
+      <div class="schema-wrap">
+        <svg viewBox="0 0 820 360" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/>
+            </marker>
+            <!-- gradient bg -->
+            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#f8fafc"/>
+              <stop offset="100%" style="stop-color:#f1f5f9"/>
+            </linearGradient>
+          </defs>
+
+          <!-- background -->
+          <rect x="6" y="6" width="808" height="348" rx="14" fill="url(#bgGrad)" stroke="#e2e8f0" stroke-width="1.5"/>
+
+          <!-- title strip -->
+          <rect x="6" y="6" width="808" height="30" rx="14" fill="#1e3a5f"/>
+          <rect x="6" y="22" width="808" height="14" fill="#1e3a5f"/>
+          <text x="26" y="25" font-family="-apple-system,sans-serif" font-size="10.5" font-weight="700" fill="#93c5fd" letter-spacing="0.1em">WORKFLOW · PROGETTO1 · FLUSSO LINEARE</text>
+
+          <!-- ── DATA FLOW LABEL ── -->
+          <text x="414" y="58" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" fill="#94a3b8" letter-spacing="0.06em">DATI IN TRANSITO</text>
+
+          <!-- connecting lines first (behind nodes) -->
+          <!-- 1→2 -->
+          <line x1="152" y1="185" x2="182" y2="185" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+          <!-- 2→3 -->
+          <line x1="306" y1="185" x2="336" y2="185" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+          <!-- 3→4 -->
+          <line x1="460" y1="185" x2="490" y2="185" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+          <!-- 4→5 -->
+          <line x1="614" y1="185" x2="644" y2="185" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+          <!-- data labels on arrows -->
+          <text x="167" y="178" text-anchor="middle" font-size="7.5" fill="#94a3b8" font-family="-apple-system,sans-serif">binary</text>
+          <text x="321" y="178" text-anchor="middle" font-size="7.5" fill="#94a3b8" font-family="-apple-system,sans-serif">base64</text>
+          <text x="475" y="178" text-anchor="middle" font-size="7.5" fill="#94a3b8" font-family="-apple-system,sans-serif">JSON</text>
+          <text x="629" y="178" text-anchor="middle" font-size="7.5" fill="#94a3b8" font-family="-apple-system,sans-serif">binary</text>
+
+          <!-- ── NODE 1: Form Trigger ── -->
+          <rect x="24" y="138" width="128" height="94" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/>
+          <rect x="24" y="138" width="128" height="32" rx="10" fill="#6366f1"/>
+          <rect x="24" y="158" width="128" height="12" fill="#6366f1"/>
+          <text x="88" y="158" text-anchor="middle" font-size="10" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">Form Trigger</text>
+          <text x="88" y="183" text-anchor="middle" font-size="8.5" fill="#4338ca" font-weight="700" font-family="-apple-system,sans-serif">On form submission</text>
+          <text x="88" y="198" text-anchor="middle" font-size="8" fill="#6366f1" font-family="-apple-system,sans-serif">📷 Carica immagine</text>
+          <text x="88" y="212" text-anchor="middle" font-size="8" fill="#6366f1" font-family="-apple-system,sans-serif">✏️ Inserisci testo</text>
+          <text x="88" y="226" text-anchor="middle" font-size="7.5" fill="#a5b4fc" font-family="-apple-system,sans-serif">webhook · v2.5</text>
+
+          <!-- ── NODE 2: Extract from File ── -->
+          <rect x="184" y="138" width="122" height="94" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+          <rect x="184" y="138" width="122" height="32" rx="10" fill="#16a34a"/>
+          <rect x="184" y="158" width="122" height="12" fill="#16a34a"/>
+          <text x="245" y="158" text-anchor="middle" font-size="10" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">Extract from File</text>
+          <text x="245" y="183" text-anchor="middle" font-size="8.5" fill="#15803d" font-weight="700" font-family="-apple-system,sans-serif">binaryToProperty</text>
+          <text x="245" y="198" text-anchor="middle" font-size="8" fill="#16a34a" font-family="-apple-system,sans-serif">Input: Carica_immagine</text>
+          <text x="245" y="212" text-anchor="middle" font-size="8" fill="#16a34a" font-family="-apple-system,sans-serif">Output: $json.data</text>
+          <text x="245" y="226" text-anchor="middle" font-size="7.5" fill="#4ade80" font-family="-apple-system,sans-serif">→ stringa base64</text>
+
+          <!-- ── NODE 3: HTTP Request ── -->
+          <rect x="338" y="120" width="122" height="130" rx="10" fill="#faf5ff" stroke="#7c3aed" stroke-width="2"/>
+          <rect x="338" y="120" width="122" height="32" rx="10" fill="#7c3aed"/>
+          <rect x="338" y="140" width="122" height="12" fill="#7c3aed"/>
+          <text x="399" y="140" text-anchor="middle" font-size="10" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">HTTP Request</text>
+          <text x="399" y="165" text-anchor="middle" font-size="8.5" fill="#6b21a8" font-weight="700" font-family="-apple-system,sans-serif">POST · Gemini API</text>
+          <text x="399" y="179" text-anchor="middle" font-size="7.5" fill="#7c3aed" font-family="-apple-system,sans-serif">gemini-2.5-flash-image</text>
+          <text x="399" y="193" text-anchor="middle" font-size="7.5" fill="#7c3aed" font-family="-apple-system,sans-serif">Auth: httpQueryAuth</text>
+          <text x="399" y="207" text-anchor="middle" font-size="7.5" fill="#a78bfa" font-family="-apple-system,sans-serif">Body: image + prompt</text>
+          <text x="399" y="221" text-anchor="middle" font-size="7.5" fill="#a78bfa" font-family="-apple-system,sans-serif">responseModalities:</text>
+          <text x="399" y="234" text-anchor="middle" font-size="7.5" fill="#a78bfa" font-family="-apple-system,sans-serif">IMAGE + TEXT</text>
+          <text x="399" y="244" text-anchor="middle" font-size="7" fill="#c4b5fd" font-family="-apple-system,sans-serif">→ candidates[0]...</text>
+
+          <!-- ── NODE 4: Convert to File ── -->
+          <rect x="492" y="138" width="122" height="94" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+          <rect x="492" y="138" width="122" height="32" rx="10" fill="#ea580c"/>
+          <rect x="492" y="158" width="122" height="12" fill="#ea580c"/>
+          <text x="553" y="158" text-anchor="middle" font-size="10" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">Convert to File</text>
+          <text x="553" y="183" text-anchor="middle" font-size="8.5" fill="#9a3412" font-weight="700" font-family="-apple-system,sans-serif">toBinary</text>
+          <text x="553" y="198" text-anchor="middle" font-size="7.5" fill="#ea580c" font-family="-apple-system,sans-serif">src: parts[1].inlineData</text>
+          <text x="553" y="212" text-anchor="middle" font-size="7.5" fill="#ea580c" font-family="-apple-system,sans-serif">output field: data</text>
+          <text x="553" y="226" text-anchor="middle" font-size="7.5" fill="#fdba74" font-family="-apple-system,sans-serif">→ file PNG binario</text>
+
+          <!-- ── NODE 5: Google Drive ── -->
+          <rect x="646" y="138" width="150" height="94" rx="10" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+          <rect x="646" y="138" width="150" height="32" rx="10" fill="#0d9488"/>
+          <rect x="646" y="158" width="150" height="12" fill="#0d9488"/>
+          <text x="721" y="158" text-anchor="middle" font-size="10" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">Upload file</text>
+          <text x="721" y="183" text-anchor="middle" font-size="8.5" fill="#0f766e" font-weight="700" font-family="-apple-system,sans-serif">Google Drive · Create</text>
+          <text x="721" y="198" text-anchor="middle" font-size="8" fill="#0d9488" font-family="-apple-system,sans-serif">My Drive / cartella fissa</text>
+          <text x="721" y="212" text-anchor="middle" font-size="7.5" fill="#0d9488" font-family="-apple-system,sans-serif">Nome: Immagine_</text>
+          <text x="721" y="224" text-anchor="middle" font-size="7.5" fill="#0d9488" font-family="-apple-system,sans-serif">ddMMyyyy_HHmm.png</text>
+          <text x="721" y="238" text-anchor="middle" font-size="7" fill="#5eead4" font-family="-apple-system,sans-serif">→ file salvato su Drive</text>
+
+          <!-- Step numbers -->
+          <circle cx="88" cy="138" r="10" fill="#6366f1"/>
+          <text x="88" y="142" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">1</text>
+          <circle cx="245" cy="138" r="10" fill="#16a34a"/>
+          <text x="245" y="142" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">2</text>
+          <circle cx="399" cy="120" r="10" fill="#7c3aed"/>
+          <text x="399" y="124" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">3</text>
+          <circle cx="553" cy="138" r="10" fill="#ea580c"/>
+          <text x="553" y="142" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">4</text>
+          <circle cx="721" cy="138" r="10" fill="#0d9488"/>
+          <text x="721" y="142" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="-apple-system,sans-serif">5</text>
+
+          <!-- legend -->
+          <rect x="20" y="295" width="780" height="44" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+          <text x="36" y="312" font-size="9" font-weight="700" fill="#94a3b8" font-family="-apple-system,sans-serif" letter-spacing=".08em">LEGENDA</text>
+          <rect x="36" y="320" width="10" height="10" rx="2" fill="#6366f1"/>
+          <text x="50" y="329" font-size="8.5" fill="#64748b" font-family="-apple-system,sans-serif">Trigger</text>
+          <rect x="110" y="320" width="10" height="10" rx="2" fill="#16a34a"/>
+          <text x="124" y="329" font-size="8.5" fill="#64748b" font-family="-apple-system,sans-serif">Elaborazione dati</text>
+          <rect x="228" y="320" width="10" height="10" rx="2" fill="#7c3aed"/>
+          <text x="242" y="329" font-size="8.5" fill="#64748b" font-family="-apple-system,sans-serif">Chiamata API esterna (AI)</text>
+          <rect x="380" y="320" width="10" height="10" rx="2" fill="#ea580c"/>
+          <text x="394" y="329" font-size="8.5" fill="#64748b" font-family="-apple-system,sans-serif">Conversione formato</text>
+          <rect x="510" y="320" width="10" height="10" rx="2" fill="#0d9488"/>
+          <text x="524" y="329" font-size="8.5" fill="#64748b" font-family="-apple-system,sans-serif">Storage esterno</text>
+          <line x1="620" y1="325" x2="648" y2="325" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+          <text x="653" y="329" font-size="8.5" fill="#64748b" font-family="-apple-system,sans-serif">flusso dati</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ── 3. NODI ── -->
+    <section id="nodi">
+      <div class="section-title"><span class="num">3</span> Nodi — parametri e configurazione</div>
+
+      <!-- NODO 1 -->
+      <div class="node-card nc-trigger">
+        <div class="node-card-header">
+          <div class="node-icon">⚡</div>
+          <div class="node-info">
+            <div class="name">On form submission <span class="badge badge-trigger">Trigger</span></div>
+            <div class="type">n8n-nodes-base.formTrigger · v2.5 · webhookId: fc7551e6-5785-4db4-90b2-8047cb6a3e14</div>
+          </div>
+        </div>
+        <table class="params">
+          <thead><tr><th>Parametro</th><th>Valore configurato</th></tr></thead>
+          <tbody>
+            <tr><td>Titolo form</td><td>Progetto1</td></tr>
+            <tr><td>Descrizione</td><td>Inserire una fotografia e un prompt</td></tr>
+            <tr><td>Campo 1</td><td><strong>Carica immagine</strong> · Tipo: <code>file</code> · Obbligatorio: sì</td></tr>
+            <tr><td>Campo 2</td><td><strong>Inserisci test</strong> · Tipo: <code>text</code> · Obbligatorio: sì</td></tr>
+          </tbody>
+        </table>
+        <div class="concept" style="margin: 14px 18px 18px;">
+          <strong>Come funziona il Form Trigger</strong>
+          n8n espone un URL pubblico (webhook) che rende accessibile il form HTML. Ogni volta che l'utente compila e invia il form, il workflow si avvia automaticamente. Il file caricato viene ricevuto come dato binario e i campi testo come JSON.
+        </div>
+      </div>
+
+      <!-- NODO 2 -->
+      <div class="node-card nc-extract">
+        <div class="node-card-header">
+          <div class="node-icon">📂</div>
+          <div class="node-info">
+            <div class="name">Extract from File <span class="badge badge-process">Elaborazione</span></div>
+            <div class="type">n8n-nodes-base.extractFromFile · v1.1</div>
+          </div>
+        </div>
+        <table class="params">
+          <thead><tr><th>Parametro</th><th>Valore configurato</th></tr></thead>
+          <tbody>
+            <tr><td>Operazione</td><td><code>binaryToPropery</code> — converte binario in proprietà JSON</td></tr>
+            <tr><td>Binary Property Name</td><td><code>Carica_immagine</code> — nome del campo binario da leggere (n8n converte gli spazi in underscore)</td></tr>
+            <tr><td>Output</td><td>Aggiunge <code>$json.data</code> all'item: stringa base64 dell'immagine</td></tr>
+          </tbody>
+        </table>
+        <div class="concept tip" style="margin: 14px 18px 18px;">
+          <strong>Perché serve questo nodo</strong>
+          La Gemini API accetta le immagini come stringa base64 nel body JSON, non come file binario diretto. Questo nodo fa la conversione necessaria: prende il file caricato dall'utente e lo trasforma nella rappresentazione testuale che l'API si aspetta.
+        </div>
+      </div>
+
+      <!-- NODO 3 -->
+      <div class="node-card nc-http">
+        <div class="node-card-header">
+          <div class="node-icon">🤖</div>
+          <div class="node-info">
+            <div class="name">HTTP Request <span class="badge badge-ai">Gemini AI</span></div>
+            <div class="type">n8n-nodes-base.httpRequest · v4.4</div>
+          </div>
+        </div>
+        <table class="params">
+          <thead><tr><th>Parametro</th><th>Valore configurato</th></tr></thead>
+          <tbody>
+            <tr><td>Metodo</td><td><code>POST</code></td></tr>
+            <tr><td>URL</td><td><code>https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent</code></td></tr>
+            <tr><td>Autenticazione</td><td><code>genericCredentialType</code> + <code>httpQueryAuth</code> — la API key viene passata come parametro <code>?key=...</code> nell'URL</td></tr>
+            <tr><td>Body type</td><td><code>json</code> (specificato manualmente)</td></tr>
+            <tr><td>responseModalities</td><td><code>["IMAGE", "TEXT"]</code> — richiede sia immagine che testo nella risposta</td></tr>
+          </tbody>
+        </table>
+        <p style="padding: 12px 18px 4px; font-size: 12.5px; color: var(--gray-500); font-weight: 600;">JSON Body inviato all'API:</p>
+        <div class="json-box">
+          <span class="kw">{</span><br>
+          &nbsp;&nbsp;<span class="str">"contents"</span><span class="kw">:</span> [<span class="kw">{</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"parts"</span><span class="kw">:</span> [<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">{</span> <span class="str">"text"</span><span class="kw">:</span> <span class="expr">"{{ $('On form submission').item.json['Inserisci test'] }}"</span> <span class="kw">}</span>, <span class="cmt">// prompt utente</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">{</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"inline_data"</span><span class="kw">:</span> <span class="kw">{</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"mime_type"</span><span class="kw">:</span> <span class="expr">"{{ $('On form submission').item.json['Carica immagine'][0].mimetype }}"</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"data"</span><span class="kw">:</span> <span class="expr">"{{ $json.data }}"</span> <span class="cmt">// base64 dell'immagine</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">}</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">}</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;]<br>
+          &nbsp;&nbsp;<span class="kw">}]</span>,<br>
+          &nbsp;&nbsp;<span class="str">"generationConfig"</span><span class="kw">:</span> <span class="kw">{</span> <span class="str">"responseModalities"</span><span class="kw">:</span> [<span class="str">"IMAGE"</span>, <span class="str">"TEXT"</span>] <span class="kw">}</span><br>
+          <span class="kw">}</span>
+        </div>
+        <div class="concept" style="margin: 14px 18px 18px;">
+          <strong>Struttura della risposta Gemini</strong>
+          La risposta JSON contiene <code>candidates[0].content.parts</code>: un array con almeno due elementi — <code>parts[0]</code> contiene il testo generato, <code>parts[1].inlineData.data</code> contiene l'immagine generata come stringa base64.
+        </div>
+      </div>
+
+      <!-- NODO 4 -->
+      <div class="node-card nc-convert">
+        <div class="node-card-header">
+          <div class="node-icon">🔄</div>
+          <div class="node-info">
+            <div class="name">Convert to File <span class="badge badge-output">Conversione</span></div>
+            <div class="type">n8n-nodes-base.convertToFile · v1.1</div>
+          </div>
+        </div>
+        <table class="params">
+          <thead><tr><th>Parametro</th><th>Valore configurato</th></tr></thead>
+          <tbody>
+            <tr><td>Operazione</td><td><code>toBinary</code> — converte una proprietà JSON in file binario</td></tr>
+            <tr><td>Source Property</td><td><code>candidates[0].content.parts[1].inlineData.data</code> — path nella risposta JSON di Gemini dove si trova la stringa base64 dell'immagine generata</td></tr>
+            <tr><td>Binary Property Name</td><td><code>data</code> — nome del campo binario nell'output del nodo</td></tr>
+          </tbody>
+        </table>
+        <div class="concept warn" style="margin: 14px 18px 18px;">
+          <strong>Nota: l'indice parts[1] è intenzionale</strong>
+          Gemini restituisce i risultati in un array <code>parts[]</code>: il testo è sempre a indice <code>[0]</code>, l'immagine a indice <code>[1]</code>. Se il modello non genera un testo (solo immagine), l'immagine potrebbe trovarsi a <code>[0]</code> — da verificare caso per caso.
+        </div>
+      </div>
+
+      <!-- NODO 5 -->
+      <div class="node-card nc-drive">
+        <div class="node-card-header">
+          <div class="node-icon">💾</div>
+          <div class="node-info">
+            <div class="name">Upload file <span class="badge badge-storage">Google Drive</span></div>
+            <div class="type">n8n-nodes-base.googleDrive · v3 · operazione: Create (upload)</div>
+          </div>
+        </div>
+        <table class="params">
+          <thead><tr><th>Parametro</th><th>Valore configurato</th></tr></thead>
+          <tbody>
+            <tr><td>Credential</td><td>Google Drive account (OAuth2)</td></tr>
+            <tr><td>Drive</td><td>My Drive</td></tr>
+            <tr><td>Cartella destinazione</td><td>ID: <code>1zhklkBJFOeUYyrERfeWbAqjPZuK-q88v</code> (cartella fissa pre-selezionata)</td></tr>
+            <tr><td>Nome file</td><td><code>Immagine_{{ $now.toFormat('ddMMyyyy_HHmm') }}.png</code></td></tr>
+            <tr><td>Esempio nome generato</td><td><code>Immagine_28052026_1322.png</code></td></tr>
+          </tbody>
+        </table>
+        <div class="concept tip" style="margin: 14px 18px 18px;">
+          <strong>Operazione Create vs Update</strong>
+          Usa sempre <strong>Create</strong> (o Upload) per salvare un nuovo file in una cartella — passando l'ID della cartella come destinazione. L'operazione <strong>Update</strong> serve invece per sovrascrivere un file già esistente e richiede l'ID del file (non della cartella). Confonderle è un errore comune.
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 4. CONNESSIONI ── -->
+    <section id="connessioni">
+      <div class="section-title"><span class="num">4</span> Mappa delle connessioni</div>
+      <table class="conn-table">
+        <thead><tr><th>Da</th><th></th><th>A</th><th>Tipo</th><th>Dato trasmesso</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>On form submission</strong></td>
+            <td class="arrow">→</td>
+            <td>Extract from File</td>
+            <td><span class="conn-type">main[0] → main[0]</span></td>
+            <td>File binario + campi testo del form</td>
+          </tr>
+          <tr>
+            <td><strong>Extract from File</strong></td>
+            <td class="arrow">→</td>
+            <td>HTTP Request</td>
+            <td><span class="conn-type">main[0] → main[0]</span></td>
+            <td><code>$json.data</code> — stringa base64 dell'immagine</td>
+          </tr>
+          <tr>
+            <td><strong>HTTP Request</strong></td>
+            <td class="arrow">→</td>
+            <td>Convert to File</td>
+            <td><span class="conn-type">main[0] → main[0]</span></td>
+            <td>Risposta JSON Gemini con <code>candidates[0].content.parts[]</code></td>
+          </tr>
+          <tr>
+            <td><strong>Convert to File</strong></td>
+            <td class="arrow">→</td>
+            <td>Upload file</td>
+            <td><span class="conn-type">main[0] → main[0]</span></td>
+            <td>File binario PNG pronto per l'upload</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── 5. CONCETTI CHIAVE ── -->
+    <section id="concetti">
+      <div class="section-title"><span class="num">5</span> Concetti chiave per progetti futuri</div>
+
+      <div class="concept">
+        <strong>Pattern: Binary → base64 → Binary</strong>
+        Ogni volta che devi inviare un file a un'API REST che non accetta upload multipart, usa questo pattern: <em>Extract from File</em> per convertire in base64, includi la stringa nel JSON body, poi <em>Convert to File</em> per tornare a binario dalla risposta. È il pattern standard per lavorare con file nelle HTTP API.
+      </div>
+
+      <div class="concept tip">
+        <strong>Accesso a nodi precedenti con <code>$('NomeNodo').item.json</code></strong>
+        In n8n ogni nodo può accedere ai dati di qualsiasi nodo precedente — non solo dell'immediato predecessore. Nel nodo HTTP Request il body usa sia <code>$json.data</code> (dal nodo precedente Extract from File) sia <code>$('On form submission').item.json[...]</code> (dal trigger, due nodi prima). Questa sintassi è fondamentale per costruire payload API complessi.
+      </div>
+
+      <div class="concept warn">
+        <strong>httpQueryAuth: come funziona l'autenticazione Gemini</strong>
+        La Gemini API accetta la chiave come query parameter nell'URL: <code>?key=API_KEY</code>. In n8n si configura con <em>Authentication: Generic Credential Type → HTTP Query Auth</em>, impostando <code>name: key</code> e <code>value: &lt;la tua API key&gt;</code>. Non usare <em>API Key</em> standard di n8n perché usa header HTTP diversi.
+      </div>
+
+      <div class="concept">
+        <strong>Naming automatico dei file con <code>$now.toFormat()</code></strong>
+        <code>$now</code> è l'oggetto Luxon DateTime disponibile in tutte le espressioni n8n. <code>toFormat('ddMMyyyy_HHmm')</code> produce timestamp leggibili come <code>28052026_1322</code>. Usa sempre un timestamp nel nome del file su Drive per evitare sovrascritture accidentali.
+      </div>
+
+      <div class="concept tip">
+        <strong>Create vs Update in Google Drive</strong>
+        <strong>Create</strong>: crea un nuovo file — richiede l'ID della <em>cartella</em> di destinazione.<br>
+        <strong>Update</strong>: sovrascrive un file esistente — richiede l'ID del <em>file</em> da aggiornare.<br>
+        Passare un ID di cartella a Update è l'errore più comune: n8n non genera un errore ma rinomina e sovrascrive la cartella stessa.
+      </div>
+
+    </section>
+
+  </div><!-- /content -->
+
+  <div class="page-footer">
+    <span>Workflow Progetto1 · ID lGuapSUkNEGhbx1B · 5 nodi</span>
+    <span>Guida generata il 28 maggio 2026</span>
+  </div>
+
+</div>
+</body>
+</html>

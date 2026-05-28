@@ -1,0 +1,44 @@
+# ============================================================
+# n8n-automation-lab — .gitignore
+# ============================================================
+
+# Variabili d'ambiente e credenziali reali
+.env
+.env.local
+.env.production
+.env.*
+!.env.example
+
+# File n8n con credenziali esportate
+*.credentials.json
+
+# File di configurazione locali
+config.local.*
+secrets.*
+
+# Database locale n8n
+n8n.sqlite
+database.sqlite
+
+# Log
+*.log
+logs/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Node (se usi script di utility)
+node_modules/
+npm-debug.log*
+
+# Output temporanei
+tmp/
+temp/

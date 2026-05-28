@@ -1,0 +1,148 @@
+{
+  "name": "Consulenza",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Prenotazione consulenza",
+        "formDescription": "Attraverso questo form puoi prenotare una consulenza",
+        "formFields": {
+          "values": [
+            { "fieldLabel": "Nome Cognome", "placeholder": "Mario Rossi" },
+            { "fieldLabel": "Email", "fieldType": "email", "placeholder": "mario.rossi@gmail.com" },
+            { "fieldLabel": "Telefono", "placeholder": "+39 123456789" },
+            {
+              "fieldLabel": "Seleziona consulente",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  { "option": "Consulente A" },
+                  { "option": "Consulente B" }
+                ]
+              }
+            }
+          ]
+        },
+        "options": { "appendAttribution": true }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [-1024, -128],
+      "id": "e93c99eb-6394-41f9-9323-1207b6cd1ab4",
+      "name": "On form submission",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "729fb309-cc43-4c50-9681-d6d7ae223602", "name": "Data", "value": "={{ new Date().toLocaleString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}", "type": "string" },
+            { "id": "1", "name": "Nome Cognome", "value": "={{ $json['Nome Cognome'] }}", "type": "string" },
+            { "id": "2", "name": "Email", "value": "={{ $json.Email }}", "type": "string" },
+            { "id": "3", "name": "Telefono", "value": "={{\"'\" + $json.Telefono }}", "type": "string" },
+            { "id": "4", "name": "Seleziona consulente", "value": "={{ $json['Seleziona consulente'] }}", "type": "string" },
+            { "id": "5", "name": "Consulente", "value": "={{ $json['Seleziona consulente'] }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-816, -128],
+      "id": "21778e84-962f-4b31-ba27-950ff652647a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Prenotazioni"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ $json.Data }}",
+            "Nome Cognome": "={{ $json['Nome Cognome'] }}",
+            "Email": "={{ $json.Email }}",
+            "Telefono": "={{ $json.Telefono }}",
+            "Consulente": "={{ $json.Consulente }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "Data", "displayName": "Data", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Nome Cognome", "displayName": "Nome Cognome", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Email", "displayName": "Email", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Telefono", "displayName": "Telefono", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Consulente", "displayName": "Consulente", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [-496, -400],
+      "id": "0f9ab974-e340-4ace-b37f-c037dddd1dad",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Creami una mail con un breve messaggio di benvenuto.\n\nQuindi riassumi tutti questi valori:\n\n{{ $json['Nome Cognome'] }}\n{{ $json.Email }}\n{{ $json.Telefono }}\n{{ $json['Seleziona consulente'] }}\n\nInfine saluta l'utente e digli che sarà contattato il prima possibile dal consulente.\n\nNOTA1: Non includere nessun preambolo\nNOTA2: Non includere all'inizio Oggetto:\nNOTA3: Firma con il nome della tua azienda",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [-464, -128],
+      "id": "61b3e0cf-81d7-45f3-83a8-41db42f3c23a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [-624, 64],
+      "id": "69e82f94-5b2b-463f-b142-29a6e19cbecd",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "Prenotazione consulenza",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [-112, -128],
+      "id": "449bcc50-8d13-4831-a943-c5a3059e0126",
+      "name": "Send a message",
+      "webhookId": "YOUR_WEBHOOK_ID_2"
+    }
+  ],
+  "connections": {
+    "On form submission": { "main": [[{ "node": "Edit Fields", "type": "main", "index": 0 }]] },
+    "Google Gemini Chat Model": { "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]] },
+    "AI Agent": { "main": [[{ "node": "Send a message", "type": "main", "index": 0 }]] },
+    "Edit Fields": { "main": [[{ "node": "Append row in sheet", "type": "main", "index": 0 }, { "node": "AI Agent", "type": "main", "index": 0 }]] }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
