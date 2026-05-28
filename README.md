@@ -107,3 +107,7 @@ Introduce la gestione di dati binari (file upload → base64 → binary), la chi
 
 **Pietro Cammise** — AI/ML Engineer  
 GitHub: [Auticad](https://github.com/Auticad) · Portfolio: [auticad.github.io/cv_cammise](https://auticad.github.io/cv_cammise/)
+
+---
+
+This project is licensed under the [MIT License](LICENSE).
