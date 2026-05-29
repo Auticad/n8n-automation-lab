@@ -124,3 +124,7 @@ Introduce il fork parallelo su tre branch AI simultanei, l'uso di `gpt-4o-search
 
 **Pietro Cammise** — AI/ML Engineer  
 GitHub: [Auticad](https://github.com/Auticad) · Portfolio: [auticad.github.io/cv_cammise](https://auticad.github.io/cv_cammise/)
+
+---
+
+This project is licensed under the [MIT License](LICENSE).
