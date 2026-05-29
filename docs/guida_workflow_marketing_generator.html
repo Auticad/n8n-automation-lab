@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guida Workflow · Marketing Generator</title>
+<style>
+  :root {
+    --indigo: #4f46e5;
+    --indigo-light: #eef2ff;
+    --indigo-border: #c7d2fe;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --green-border: #bbf7d0;
+    --purple: #7c3aed;
+    --purple-light: #faf5ff;
+    --purple-border: #e9d5ff;
+    --orange: #ea580c;
+    --orange-light: #fff7ed;
+    --orange-border: #fed7aa;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --blue-border: #bfdbfe;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --red-border: #fecaca;
+    --teal: #0d9488;
+    --teal-light: #f0fdfa;
+    --teal-border: #99f6e4;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --amber-border: #fde68a;
+    --gray-900: #111827;
+    --gray-700: #374151;
+    --gray-500: #6b7280;
+    --gray-200: #e5e7eb;
+    --gray-100: #f3f4f6;
+    --gray-50: #f9fafb;
+    --navy: #1e3a5f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--gray-700);
+    background: #eef0f4;
+    padding: 32px 16px;
+  }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 32px rgba(0,0,0,.09);
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  .page-header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4f82 100%);
+    padding: 44px 52px 40px;
+    color: #fff;
+  }
+  .page-header .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #93c5fd;
+    margin-bottom: 10px;
+  }
+  .page-header h1 { font-size: 36px; font-weight: 800; color: #fff; line-height: 1.15; }
+  .page-header .sub { margin-top: 8px; font-size: 15px; color: #bfdbfe; }
+  .page-header .meta {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .page-header .meta span {
+    font-size: 12px;
+    color: #93c5fd;
+    background: rgba(255,255,255,.12);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.15);
+  }
+
+  /* TOC */
+  .toc {
+    background: var(--blue-light);
+    border-bottom: 1px solid var(--blue-border);
+    padding: 18px 52px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .toc a {
+    font-size: 12.5px;
+    color: var(--blue);
+    text-decoration: none;
+    padding: 4px 13px;
+    border-radius: 20px;
+    background: #fff;
+    border: 1px solid var(--blue-border);
+    transition: all .15s;
+    font-weight: 500;
+  }
+  .toc a:hover { background: var(--blue-border); }
+
+  /* CONTENT */
+  .content { padding: 52px; }
+  section { margin-bottom: 56px; }
+
+  .section-title {
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--navy);
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--blue-border);
+    margin-bottom: 24px;
+  }
+
+  p { margin-bottom: 14px; }
+  code { background: var(--gray-100); padding: 2px 7px; border-radius: 5px; font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace; }
+  pre { background: var(--gray-900); color: #e2e8f0; padding: 20px 24px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; font-family: 'SF Mono', 'Fira Code', monospace; margin: 16px 0; }
+
+  /* FLOW SCHEMA */
+  .flow-wrapper {
+    background: #f8fafc;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 32px 24px;
+    overflow-x: auto;
+  }
+
+  .flow-legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--gray-700);
+  }
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* FLOW LINEAR (fase 1) */
+  .flow-linear {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 20px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  .flow-arrow {
+    color: var(--gray-500);
+    font-size: 18px;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+
+  /* NODO */
+  .node {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 110px;
+    max-width: 130px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .node-box {
+    width: 100%;
+    padding: 10px 8px;
+    border-radius: 10px;
+    border: 2px solid;
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+  }
+  .node-sub { font-size: 10px; font-weight: 400; margin-top: 3px; opacity: .75; }
+
+  /* COLORI NODI */
+  .node-gray .node-box   { background: var(--gray-100); border-color: var(--gray-200); color: var(--gray-700); }
+  .node-green .node-box  { background: var(--green-light); border-color: var(--green-border); color: #15803d; }
+  .node-blue .node-box   { background: var(--blue-light); border-color: var(--blue-border); color: var(--blue); }
+  .node-orange .node-box { background: var(--orange-light); border-color: var(--orange-border); color: var(--orange); }
+  .node-purple .node-box { background: var(--purple-light); border-color: var(--purple-border); color: var(--purple); }
+  .node-amber .node-box  { background: var(--amber-light); border-color: var(--amber-border); color: var(--amber); }
+  .node-red .node-box    { background: var(--red-light); border-color: var(--red-border); color: var(--red); }
+  .node-teal .node-box   { background: var(--teal-light); border-color: var(--teal-border); color: var(--teal); }
+
+  /* FORK 3 BRANCH */
+  .flow-fork-wrapper {
+    margin-bottom: 20px;
+  }
+  .fork-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--orange);
+    margin-bottom: 10px;
+    padding: 4px 12px;
+    background: var(--orange-light);
+    border-radius: 6px;
+    display: inline-block;
+  }
+  .branches {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 16px;
+    border-left: 3px solid var(--orange-border);
+    margin-left: 6px;
+  }
+  .branch {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: nowrap;
+  }
+  .branch-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--gray-500);
+    min-width: 56px;
+    flex-shrink: 0;
+  }
+
+  /* MERGE LINE */
+  .flow-merge {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 8px;
+    padding-left: 32px;
+  }
+  .merge-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--blue);
+    margin-bottom: 10px;
+    padding: 4px 12px;
+    background: var(--blue-light);
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  /* NODO TABLE */
+  .node-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .node-table th, .node-table td {
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .node-table th { font-weight: 700; color: var(--navy); background: var(--gray-50); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .node-table tr:last-child td { border-bottom: none; }
+  .node-table td:first-child { font-weight: 600; color: var(--gray-700); width: 26%; }
+
+  /* NODE CARD */
+  .node-card {
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .node-card-header {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .node-card-header .num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; flex-shrink: 0;
+  }
+  .node-card-header .name { font-size: 15px; font-weight: 700; }
+  .node-card-header .type { font-size: 12px; opacity: .7; margin-left: auto; }
+  .node-card-body { padding: 0; }
+
+  /* COLORI CARD */
+  .card-gray   .node-card-header { background: var(--gray-100); }
+  .card-gray   .node-card-header .num { background: var(--gray-200); color: var(--gray-700); }
+  .card-green  .node-card-header { background: var(--green-light); }
+  .card-green  .node-card-header .num { background: var(--green-border); color: #15803d; }
+  .card-blue   .node-card-header { background: var(--blue-light); }
+  .card-blue   .node-card-header .num { background: var(--blue-border); color: var(--blue); }
+  .card-orange .node-card-header { background: var(--orange-light); }
+  .card-orange .node-card-header .num { background: var(--orange-border); color: var(--orange); }
+  .card-purple .node-card-header { background: var(--purple-light); }
+  .card-purple .node-card-header .num { background: var(--purple-border); color: var(--purple); }
+  .card-amber  .node-card-header { background: var(--amber-light); }
+  .card-amber  .node-card-header .num { background: var(--amber-border); color: var(--amber); }
+  .card-red    .node-card-header { background: var(--red-light); }
+  .card-red    .node-card-header .num { background: var(--red-border); color: var(--red); }
+  .card-teal   .node-card-header { background: var(--teal-light); }
+  .card-teal   .node-card-header .num { background: var(--teal-border); color: var(--teal); }
+
+  .info-box {
+    background: var(--indigo-light);
+    border: 1px solid var(--indigo-border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 14px;
+    font-size: 13.5px;
+  }
+  .warn-box {
+    background: var(--amber-light);
+    border: 1px solid var(--amber-border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 14px;
+    font-size: 13.5px;
+  }
+
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li {
+    counter-increment: steps;
+    display: flex; gap: 14px; align-items: flex-start;
+    margin-bottom: 14px;
+    font-size: 14px;
+  }
+  .step-list li::before {
+    content: counter(steps);
+    min-width: 26px; height: 26px;
+    background: var(--navy); color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .prereq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .prereq-item {
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .prereq-item strong { display: block; margin-bottom: 4px; color: var(--navy); }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; border-radius: 0; }
+    pre { border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="label">n8n Workflow · 03</div>
+    <h1>Marketing Generator</h1>
+    <div class="sub">Analisi di mercato AI-powered → post social + prompt immagine + prompt video → report PDF via email</div>
+    <div class="meta">
+      <span>⚡⚡⚡⚡ Esperto</span>
+      <span>18 nodi</span>
+      <span>Trigger: manuale</span>
+      <span>Google Sheets · OpenAI · Google Drive · Gmail</span>
+      <span>ID: 1hRhUQ8JI2zH6ZJN</span>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <a href="#overview">Panoramica</a>
+    <a href="#schema">Schema a colori</a>
+    <a href="#nodi">Tutti i nodi</a>
+    <a href="#prerequisiti">Prerequisiti</a>
+    <a href="#configurazione">Configurazione</a>
+    <a href="#concetti">Concetti chiave</a>
+  </div>
+
+  <div class="content">
+
+    <!-- 1. PANORAMICA -->
+    <section id="overview">
+      <div class="section-title">1. Panoramica</div>
+      <p>Il workflow legge da un Google Sheet i prodotti in promozione, seleziona quello con la maggiore quantità disponibile e genera automaticamente — in parallelo su tre branch AI — un post social ottimizzato per Instagram/LinkedIn, un prompt immagine per generatori come Midjourney e FLUX, e un prompt video per Google Veo o Runway.</p>
+      <p>I tre output vengono ricombinati, salvati come Google Docs, convertiti in PDF con nome data-based e inviati via email come allegato. L'intera pipeline richiede un solo click e produce un pacchetto marketing completo pronto all'uso.</p>
+      <p><strong>Tecnologie principali:</strong> Google Sheets (lettura dati prodotto) → <code>gpt-4o-search-preview</code> via HTTP (analisi mercato in tempo reale con web search) → tre istanze <code>gpt-4o</code> in parallelo via LLM Chain (copywriting social, image prompt, video prompt) → Google Drive (creazione Docs + export PDF) → Gmail (invio allegato).</p>
+    </section>
+
+    <!-- 2. SCHEMA A COLORI -->
+    <section id="schema">
+      <div class="section-title">2. Schema a colori del flusso</div>
+
+      <div class="flow-wrapper">
+        <!-- Legenda -->
+        <div class="flow-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#e5e7eb;border:1.5px solid #d1d5db"></div> Trigger</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#bbf7d0;border:1.5px solid #16a34a"></div> Google Services</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#bfdbfe;border:1.5px solid #2563eb"></div> Utility (Sort / Limit / Merge / Set)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fed7aa;border:1.5px solid #ea580c"></div> HTTP / API esterna</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e9d5ff;border:1.5px solid #7c3aed"></div> AI / LLM</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fde68a;border:1.5px solid #d97706"></div> Code</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fecaca;border:1.5px solid #dc2626"></div> Email</div>
+        </div>
+
+        <!-- FASE 1: lineare -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);margin-bottom:10px;">Fase 1 — Acquisizione dati</div>
+        <div class="flow-linear">
+          <div class="node node-gray">
+            <div class="node-box">▶ Trigger<div class="node-sub">Manuale</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="node node-green">
+            <div class="node-box">Google Sheets<div class="node-sub">Filtra "si"</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="node node-blue">
+            <div class="node-box">Sort<div class="node-sub">↓ Quantità</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="node node-blue">
+            <div class="node-box">Limit<div class="node-sub">Top 1</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="node node-orange">
+            <div class="node-box">HTTP Request<div class="node-sub">OpenAI Search</div></div>
+          </div>
+        </div>
+
+        <!-- FASE 2: fork 3 branch -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);margin:20px 0 10px;">Fase 2 — Generazione parallela AI (fork 3 branch)</div>
+        <div class="flow-fork-wrapper">
+          <div class="fork-label">⑃ Fork dal report di mercato</div>
+          <div class="branches">
+
+            <div class="branch">
+              <div class="branch-label" style="color:#7c3aed">Branch A</div>
+              <div class="node node-purple" style="min-width:90px"><div class="node-box">LLM Chain<div class="node-sub">Post Social</div></div></div>
+              <div class="flow-arrow">→</div>
+              <div class="node node-purple" style="min-width:90px"><div class="node-box">OpenAI<div class="node-sub">gpt-4o</div></div></div>
+              <div class="flow-arrow">→</div>
+              <div class="node node-blue" style="min-width:90px"><div class="node-box">Set Field<div class="node-sub">"Social"</div></div></div>
+              <div class="flow-arrow" style="color:#2563eb">⤵</div>
+            </div>
+
+            <div class="branch">
+              <div class="branch-label" style="color:#7c3aed">Branch B</div>
+              <div class="node node-purple" style="min-width:90px"><div class="node-box">LLM Chain1<div class="node-sub">Image Prompt</div></div></div>
+              <div class="flow-arrow">→</div>
+              <div class="node node-purple" style="min-width:90px"><div class="node-box">OpenAI1<div class="node-sub">gpt-4o</div></div></div>
+              <div class="flow-arrow">→</div>
+              <div class="node node-blue" style="min-width:90px"><div class="node-box">Set Field1<div class="node-sub">"Image"</div></div></div>
+              <div class="flow-arrow" style="color:#2563eb">⤵</div>
+            </div>
+
+            <div class="branch">
+              <div class="branch-label" style="color:#7c3aed">Branch C</div>
+              <div class="node node-purple" style="min-width:90px"><div class="node-box">LLM Chain2<div class="node-sub">Video Prompt</div></div></div>
+              <div class="flow-arrow">→</div>
+              <div class="node node-purple" style="min-width:90px"><div class="node-box">OpenAI2<div class="node-sub">gpt-4o</div></div></div>
+              <div class="flow-arrow">→</div>
+              <div class="node node-blue" style="min-width:90px"><div class="node-box">Set Field2<div class="node-sub">"Video"</div></div></div>
+              <div class="flow-arrow" style="color:#2563eb">⤵</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- FASE 3: merge e output -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);margin-bottom:10px;">Fase 3 — Assemblaggio e distribuzione</div>
+        <div class="flow-linear">
+          <div class="node node-blue">
+            <div class="node-box">Merge<div class="node-sub">3 input → 1</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="node node-green">
+            <div class="node-box">Google Drive<div class="node-sub">Crea Docs</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="node node-green">
+            <div class="node-box">Google Drive<div class="node-sub">Esporta PDF</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="node node-amber">
+            <div class="node-box">Code JS<div class="node-sub">Rinomina PDF</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="node node-red">
+            <div class="node-box">Gmail<div class="node-sub">Invia PDF</div></div>
+          </div>
+        </div>
+
+      </div><!-- /flow-wrapper -->
+    </section>
+
+    <!-- 3. TUTTI I NODI -->
+    <section id="nodi">
+      <div class="section-title">3. Tutti i nodi — configurazione dettagliata</div>
+
+      <!-- NODO 1 -->
+      <div class="node-card card-gray">
+        <div class="node-card-header">
+          <div class="num" style="background:#e5e7eb;color:#374151">1</div>
+          <div class="name">When clicking 'Execute workflow'</div>
+          <div class="type">Manual Trigger</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Tipo</td><td><code>n8n-nodes-base.manualTrigger</code></td></tr>
+            <tr><td>Funzione</td><td>Avvia il workflow manualmente al click del pulsante "Execute workflow" in n8n. Nessuna configurazione richiesta.</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- NODO 2 -->
+      <div class="node-card card-green">
+        <div class="node-card-header">
+          <div class="num" style="background:#bbf7d0;color:#15803d">2</div>
+          <div class="name">Get row(s) in sheet</div>
+          <div class="type">Google Sheets</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Operazione</td><td>Get rows (leggi righe)</td></tr>
+            <tr><td>Spreadsheet</td><td>ID: <code>YOUR_SPREADSHEET_ID</code> (placeholder)</td></tr>
+            <tr><td>Foglio</td><td>"Articoli sportivi" (gid: 1537923810)</td></tr>
+            <tr><td>Filtro</td><td>Colonna <code>Promozione</code> = <code>si</code></td></tr>
+            <tr><td>Credenziale</td><td>Google Sheets OAuth2</td></tr>
+          </table>
+          <div class="info-box">Il foglio deve avere almeno le colonne: <code>Nome</code>, <code>Quantità</code>, <code>Promozione</code>. Il filtro recupera solo le righe dove Promozione è "si" (case sensitive — verifica che il valore nel foglio corrisponda esattamente).</div>
+        </div>
+      </div>
+
+      <!-- NODO 3 -->
+      <div class="node-card card-blue">
+        <div class="node-card-header">
+          <div class="num" style="background:#bfdbfe;color:#2563eb">3</div>
+          <div class="name">Sort</div>
+          <div class="type">Sort</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Campo ordinamento</td><td><code>Quantità</code></td></tr>
+            <tr><td>Ordine</td><td>Decrescente (descending)</td></tr>
+          </table>
+          <div class="info-box">Porta in cima il prodotto in promozione con la scorta più alta — logica: se ne hai tante, conviene promuoverlo.</div>
+        </div>
+      </div>
+
+      <!-- NODO 4 -->
+      <div class="node-card card-blue">
+        <div class="node-card-header">
+          <div class="num" style="background:#bfdbfe;color:#2563eb">4</div>
+          <div class="name">Limit</div>
+          <div class="type">Limit</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Limite</td><td>1 (default — mantieni solo il top)</td></tr>
+          </table>
+          <div class="info-box">Passa un solo item al branch successivo: il prodotto con più scorte tra quelli in promozione. Questo evita di generare N report paralleli e controllare i costi API.</div>
+        </div>
+      </div>
+
+      <!-- NODO 5 -->
+      <div class="node-card card-orange">
+        <div class="node-card-header">
+          <div class="num" style="background:#fed7aa;color:#ea580c">5</div>
+          <div class="name">HTTP Request a OpenAI Search</div>
+          <div class="type">HTTP Request</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Metodo</td><td>POST</td></tr>
+            <tr><td>URL</td><td><code>https://api.openai.com/v1/chat/completions</code></td></tr>
+            <tr><td>Autenticazione</td><td>HTTP Header Auth (Bearer token)</td></tr>
+            <tr><td>Modello</td><td><code>gpt-4o-search-preview</code></td></tr>
+            <tr><td>max_tokens</td><td>2000</td></tr>
+            <tr><td>Timeout</td><td>60.000 ms (60 secondi)</td></tr>
+            <tr><td>Credenziale</td><td>OpenAI API Key (header auth)</td></tr>
+          </table>
+          <p style="padding:12px 12px 0">Il prompt di sistema definisce un "Senior Marketing Strategist". Il prompt utente chiede un'analisi del prodotto <code>{{ $json.Nome }}</code> che includa:</p>
+          <ul style="padding:8px 12px 14px;font-size:13.5px;padding-left:32px;">
+            <li>Panoramica del mercato attuale</li>
+            <li>Trending topics e viralità social</li>
+            <li>Analisi del target audience</li>
+            <li>Keywords SEO e hashtag Instagram/TikTok</li>
+            <li>3 angoli di marketing creativi</li>
+          </ul>
+          <div class="warn-box"><strong>Nota:</strong> <code>gpt-4o-search-preview</code> è un modello con capacità di web search in tempo reale. Il timeout a 60 secondi è necessario perché la ricerca web può rallentare la risposta rispetto ai modelli standard. Questo nodo è il più costoso dell'intera pipeline — stima ~$0.03–0.08 per chiamata.</div>
+        </div>
+      </div>
+
+      <!-- NODO 6 + 7 (Branch A) -->
+      <div class="node-card card-purple">
+        <div class="node-card-header">
+          <div class="num" style="background:#e9d5ff;color:#7c3aed">6</div>
+          <div class="name">Basic LLM Chain — Post Social (Branch A)</div>
+          <div class="type">LLM Chain + OpenAI Chat Model</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Tipo nodo</td><td><code>@n8n/n8n-nodes-langchain.chainLlm</code></td></tr>
+            <tr><td>Modello collegato</td><td>OpenAI Chat Model — <code>gpt-4o</code></td></tr>
+            <tr><td>Persona</td><td>Senior Social Media Manager, copywriting persuasivo</td></tr>
+            <tr><td>Input</td><td><code>{{ $json.choices[0].message.content }}</code> (report dal nodo 5)</td></tr>
+            <tr><td>Output atteso</td><td>Post singolo Instagram/LinkedIn con struttura: gancio in maiuscolo → corpo 2 frasi → CTA → 3 hashtag virali</td></tr>
+          </table>
+          <div class="info-box">Il prompt impone una struttura rigida: niente "Ciao a tutti", emoji strategiche ma non eccessive, tono urgente FOMO. Il sub-node <strong>OpenAI Chat Model</strong> è collegato come language model provider con <code>gpt-4o</code>.</div>
+        </div>
+      </div>
+
+      <!-- NODO 8 + 9 (Branch B) -->
+      <div class="node-card card-purple">
+        <div class="node-card-header">
+          <div class="num" style="background:#e9d5ff;color:#7c3aed">7</div>
+          <div class="name">Basic LLM Chain1 — Image Prompt (Branch B)</div>
+          <div class="type">LLM Chain + OpenAI Chat Model</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Tipo nodo</td><td><code>@n8n/n8n-nodes-langchain.chainLlm</code></td></tr>
+            <tr><td>Modello collegato</td><td>OpenAI Chat Model1 — <code>gpt-4o</code></td></tr>
+            <tr><td>Persona</td><td>Senior AI Art Director (Midjourney, FLUX, Nano Banana Pro)</td></tr>
+            <tr><td>Output atteso</td><td>Prompt tecnico in inglese per generazione immagini: soggetto → contesto → illuminazione → angolo camera → stile/qualità</td></tr>
+            <tr><td>Vincoli</td><td>Solo inglese, nessuna introduzione, formato denso separato da virgole</td></tr>
+          </table>
+          <div class="info-box">Il prompt è ottimizzato per motori di generazione immagini (Midjourney, FLUX, Stable Diffusion). La struttura in 5 parti (soggetto, contesto, illuminazione, camera, stile) è la formula standard per prompt di qualità commerciale.</div>
+        </div>
+      </div>
+
+      <!-- NODO 10 + 11 (Branch C) -->
+      <div class="node-card card-purple">
+        <div class="node-card-header">
+          <div class="num" style="background:#e9d5ff;color:#7c3aed">8</div>
+          <div class="name">Basic LLM Chain2 — Video Prompt (Branch C)</div>
+          <div class="type">LLM Chain + OpenAI Chat Model</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Tipo nodo</td><td><code>@n8n/n8n-nodes-langchain.chainLlm</code></td></tr>
+            <tr><td>Modello collegato</td><td>OpenAI Chat Model2 — <code>gpt-4o</code></td></tr>
+            <tr><td>Persona</td><td>Regista cinematografico esperto AI Video (Veo, Sora, Runway)</td></tr>
+            <tr><td>Output atteso</td><td>Prompt per clip video da 5 secondi: scena → movimento soggetto → movimento camera → stile</td></tr>
+            <tr><td>Vincoli</td><td>Solo inglese, descrizione esplicita fisica e movimento, nessuna introduzione</td></tr>
+          </table>
+          <div class="info-box">Il segreto del video AI è descrivere il <strong>movimento</strong>. Il prompt forza sempre la descrizione di: come si muove il soggetto, come si muove la camera, e il tipo di fisica visiva (acqua, fuoco, velocità, etc.).</div>
+        </div>
+      </div>
+
+      <!-- NODI 12-14: Edit Fields -->
+      <div class="node-card card-blue">
+        <div class="node-card-header">
+          <div class="num" style="background:#bfdbfe;color:#2563eb">9–11</div>
+          <div class="name">Edit Fields / Edit Fields1 / Edit Fields2</div>
+          <div class="type">Set (3 nodi)</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Nodo</th><th>Campo creato</th><th>Valore</th></tr>
+            <tr><td>Edit Fields (A)</td><td><code>Social</code></td><td><code>{{ $json.text }}</code></td></tr>
+            <tr><td>Edit Fields1 (B)</td><td><code>Image</code></td><td><code>{{ $json.text }}</code></td></tr>
+            <tr><td>Edit Fields2 (C)</td><td><code>Video</code></td><td><code>{{ $json.text }}</code></td></tr>
+          </table>
+          <div class="info-box">Ogni nodo Set rinomina l'output del LLM Chain (che arriva come <code>text</code>) in un campo semanticamente identificabile. Questo è essenziale per il Merge successivo che combina i 3 branch per posizione.</div>
+        </div>
+      </div>
+
+      <!-- NODO 15: Merge -->
+      <div class="node-card card-blue">
+        <div class="node-card-header">
+          <div class="num" style="background:#bfdbfe;color:#2563eb">12</div>
+          <div class="name">Merge</div>
+          <div class="type">Merge</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Modalità</td><td>Combine by position</td></tr>
+            <tr><td>Numero input</td><td>3 (uno per branch)</td></tr>
+          </table>
+          <div class="info-box"><strong>Combine by position</strong>: prende il primo item da ciascuno dei 3 input e li combina in un unico item con tutti i campi (<code>Social</code>, <code>Image</code>, <code>Video</code>). Funziona correttamente perché il Limit al nodo 4 garantisce che ogni branch produca esattamente 1 item.</div>
+        </div>
+      </div>
+
+      <!-- NODO 16: Google Drive Docs -->
+      <div class="node-card card-green">
+        <div class="node-card-header">
+          <div class="num" style="background:#bbf7d0;color:#15803d">13</div>
+          <div class="name">Creo un DOCS</div>
+          <div class="type">Google Drive</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Operazione</td><td>Create from text</td></tr>
+            <tr><td>Cartella destinazione</td><td>My Drive / Root</td></tr>
+            <tr><td>Converti in Google Doc</td><td>Sì (opzione <code>convertToGoogleDocument: true</code>)</td></tr>
+            <tr><td>Credenziale</td><td>Google Drive OAuth2</td></tr>
+          </table>
+          <p style="padding:12px 12px 0;font-size:13.5px;">Il contenuto del documento è:</p>
+          <pre>REPORT STRATEGICO
+=================
+
+Social
+{{ $json.Social }}
+
+image
+{{ $json.Image }}
+
+Video
+{{ $json.Video }}</pre>
+          <div class="info-box">Il documento viene creato nella root del Drive. Se preferisci una cartella specifica, modifica il parametro <code>folderId</code> con l'ID della cartella di destinazione.</div>
+        </div>
+      </div>
+
+      <!-- NODO 17: Google Drive PDF -->
+      <div class="node-card card-green">
+        <div class="node-card-header">
+          <div class="num" style="background:#bbf7d0;color:#15803d">14</div>
+          <div class="name">Coverto in PDF</div>
+          <div class="type">Google Drive</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Operazione</td><td>Download file</td></tr>
+            <tr><td>File ID</td><td><code>{{ $json.id }}</code> (ID del Docs creato al nodo precedente)</td></tr>
+            <tr><td>Formato conversione</td><td><code>application/pdf</code> (Google Docs → PDF)</td></tr>
+            <tr><td>Credenziale</td><td>Google Drive OAuth2</td></tr>
+          </table>
+          <div class="info-box">Google Drive consente di scaricare un Docs direttamente in formato PDF tramite l'API. Il file binario PDF viene passato come dato binario al nodo successivo.</div>
+        </div>
+      </div>
+
+      <!-- NODO 18: Code JS -->
+      <div class="node-card card-amber">
+        <div class="node-card-header">
+          <div class="num" style="background:#fde68a;color:#d97706">15</div>
+          <div class="name">Code in JavaScript</div>
+          <div class="type">Code</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Linguaggio</td><td>JavaScript</td></tr>
+          </table>
+          <pre>const oggi = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+const nuovoNome = `Report_Strategico_${oggi}.pdf`;
+
+if ($input.item.binary && $input.item.binary.data) {
+  $input.item.binary.data.fileName = nuovoNome;
+}
+
+return $input.item;</pre>
+          <div class="info-box">Rinomina il file binario PDF con il formato <code>Report_Strategico_YYYY-MM-DD.pdf</code> prima di allegarlo all'email. Il nome viene iniettato nei metadati del dato binario, non nel file fisico su Drive.</div>
+        </div>
+      </div>
+
+      <!-- NODO 19: Gmail -->
+      <div class="node-card card-red">
+        <div class="node-card-header">
+          <div class="num" style="background:#fecaca;color:#dc2626">16</div>
+          <div class="name">Send a message</div>
+          <div class="type">Gmail</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Destinatario</td><td><code>YOUR_EMAIL@gmail.com</code> (placeholder)</td></tr>
+            <tr><td>Oggetto</td><td>"Nuovo Report Marketing Pronto"</td></tr>
+            <tr><td>Corpo</td><td>"In allegato trovi il report strategico completo."</td></tr>
+            <tr><td>Allegati</td><td>Dato binario dal nodo precedente (PDF rinominato)</td></tr>
+            <tr><td>Credenziale</td><td>Gmail OAuth2</td></tr>
+          </table>
+          <div class="warn-box"><strong>Da configurare:</strong> l'indirizzo email di destinazione nel JSON originale va sostituito con il tuo. Nel file JSON del repository il valore è già anonimizzato come placeholder.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 4. PREREQUISITI -->
+    <section id="prerequisiti">
+      <div class="section-title">4. Prerequisiti</div>
+      <div class="prereq-grid">
+        <div class="prereq-item">
+          <strong>n8n</strong>
+          Istanza locale (<code>npx n8n</code>) o su cloud. Versione ≥ 1.x consigliata per i nodi LangChain.
+        </div>
+        <div class="prereq-item">
+          <strong>Account Google</strong>
+          Per Google Sheets, Google Drive e Gmail. Serve un OAuth2 app configurata nella Google Cloud Console.
+        </div>
+        <div class="prereq-item">
+          <strong>OpenAI API Key</strong>
+          Due credenziali distinte: una <strong>HTTP Header Auth</strong> per la chiamata a <code>gpt-4o-search-preview</code>, una <strong>OpenAI API</strong> nativa per i tre LLM Chain.
+        </div>
+        <div class="prereq-item">
+          <strong>Google Sheet strutturato</strong>
+          Un foglio con almeno le colonne <code>Nome</code>, <code>Quantità</code>, <code>Promozione</code>. I valori nella colonna Promozione devono essere esattamente "si" (lowercase).
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. CONFIGURAZIONE -->
+    <section id="configurazione">
+      <div class="section-title">5. Configurazione prima dell'uso</div>
+      <ol class="step-list">
+        <li>Importa <code>marketing-generator.json</code> in n8n (<em>Workflow → Import from file</em>)</li>
+        <li>In n8n, crea una credenziale <strong>HTTP Header Auth</strong>:
+          <br>— Nome parametro: <code>Authorization</code>
+          <br>— Valore: <code>Bearer sk-...</code> (la tua chiave OpenAI)
+          <br>Collega questa credenziale al nodo <strong>HTTP Request a OpenAI Search</strong></li>
+        <li>Crea una credenziale <strong>OpenAI API</strong> nativa con la stessa chiave API. Collegala ai tre nodi <strong>OpenAI Chat Model</strong>, <strong>OpenAI Chat Model1</strong>, <strong>OpenAI Chat Model2</strong></li>
+        <li>Crea una credenziale <strong>Google OAuth2</strong> e collegala ai nodi <strong>Google Sheets</strong>, <strong>Google Drive</strong> (entrambi) e <strong>Gmail</strong></li>
+        <li>Apri il nodo <strong>Get row(s) in sheet</strong> e sostituisci l'ID del foglio con il tuo. Verifica che il nome del foglio sia "Articoli sportivi" o aggiornalo</li>
+        <li>Apri il nodo <strong>Send a message</strong> e imposta l'indirizzo email di destinazione</li>
+        <li>Attiva il workflow → click su <strong>Execute workflow</strong> per il primo test</li>
+      </ol>
+    </section>
+
+    <!-- 6. CONCETTI CHIAVE -->
+    <section id="concetti">
+      <div class="section-title">6. Concetti chiave appresi</div>
+      <p><strong>Fork e parallelismo:</strong> un singolo nodo può avere più connessioni in uscita verso nodi diversi. n8n esegue tutti i branch in parallelo, non in serie. Questo dimezza il tempo di esecuzione rispetto a tre chiamate LLM sequenziali.</p>
+      <p><strong>Modelli con web search:</strong> <code>gpt-4o-search-preview</code> non è disponibile tramite il nodo OpenAI nativo di n8n, che supporta solo i modelli standard. Per usarlo occorre una chiamata HTTP diretta all'API con autenticazione header. La risposta ha struttura <code>choices[0].message.content</code>.</p>
+      <p><strong>Sub-node LLM in n8n:</strong> i nodi <code>chainLlm</code> richiedono un language model provider collegato come sub-node tramite connessione di tipo <code>ai_languageModel</code>. Non è una connessione main standard — viene disegnata come filo tratteggiato nell'editor.</p>
+      <p><strong>Merge by position:</strong> funziona correttamente solo se tutti gli input hanno lo stesso numero di item. Il nodo Limit prima del fork garantisce 1 item per branch, rendendo il merge deterministico.</p>
+      <p><strong>Dati binari e Google Drive:</strong> il nodo Google Drive in modalità download restituisce un dato binario, non un JSON. Il nodo Code successivo manipola i metadati del binario (<code>$input.item.binary.data.fileName</code>) senza toccare il contenuto del file.</p>
+    </section>
+
+    <div style="border-top:1px solid var(--gray-200);padding-top:24px;color:var(--gray-500);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <span>Workflow: Marketing Generator · ID n8n: 1hRhUQ8JI2zH6ZJN</span>
+      <span>Pietro Cammise — <a href="https://github.com/Auticad" style="color:var(--blue)">github.com/Auticad</a></span>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

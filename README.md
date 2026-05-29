@@ -12,6 +12,7 @@ Una collezione di workflow n8n organizzati per **livello di complessità crescen
 |---|---|---|---|---|---|
 | 01 | [Consulenza](workflows/01-consulenza/) | ⚡⚡ Intermedio | Form pubblico | Google Sheets, Gemini, Gmail, AI Agent | [HTML](docs/guida_workflow_consulenza.html) |
 | 02 | [Progetto1](workflows/02-progetto1/) | ⚡⚡⚡ Avanzato | Form con upload | Gemini API (HTTP), Google Drive, dati binari, If | [HTML](docs/guida_workflow_progetto1.html) |
+| 03 | [Marketing Generator](workflows/03-marketing-generator/) | ⚡⚡⚡⚡ Esperto | Manuale | OpenAI Search, gpt-4o (×3), Google Sheets, Drive, Gmail, fork parallelo | [HTML](docs/guida_workflow_marketing_generator.html) |
 
 > Il workflow **GMAIL** (base) non è incluso perché considerato troppo semplice per documentazione dedicata.
 
@@ -55,6 +56,15 @@ Incolla la tua API key.
 - Name: `key`  
 - Value: la tua chiave API Gemini
 
+**OpenAI API (per Marketing Generator — LLM Chain)**  
+`Settings → Credentials → Add Credential → OpenAI API`  
+Incolla la tua chiave `sk-...`
+
+**HTTP Header Auth (per Marketing Generator — gpt-4o-search-preview)**  
+`Settings → Credentials → Add Credential → HTTP Header Auth`  
+- Name: `Authorization`  
+- Value: `Bearer sk-...` (la stessa chiave OpenAI)
+
 ---
 
 ## Valori da sostituire nei JSON
@@ -73,20 +83,24 @@ Alcuni ID di risorse sono stati anonimizzati per sicurezza. Prima di attivare un
 
 ```
 n8n-automation-lab/
-├── README.md                         ← questo file
-├── SECURITY.md                       ← linee guida per non esporre credenziali
-├── .gitignore                        ← esclude .env e file sensibili
-├── .env.example                      ← template variabili d'ambiente
+├── README.md                                    ← questo file
+├── SECURITY.md                                  ← linee guida per non esporre credenziali
+├── .gitignore                                   ← esclude .env e file sensibili
+├── .env.example                                 ← template variabili d'ambiente
 ├── workflows/
 │   ├── 01-consulenza/
-│   │   ├── consulenza.json           ← workflow importabile (sanitizzato)
-│   │   └── README.md                 ← schema, nodi, istruzioni
-│   └── 02-progetto1/
-│       ├── progetto1.json            ← workflow importabile (sanitizzato)
-│       └── README.md                 ← schema, nodi, istruzioni
+│   │   ├── consulenza.json                      ← workflow importabile (sanitizzato)
+│   │   └── README.md                            ← schema, nodi, istruzioni
+│   ├── 02-progetto1/
+│   │   ├── progetto1.json                       ← workflow importabile (sanitizzato)
+│   │   └── README.md                            ← schema, nodi, istruzioni
+│   └── 03-marketing-generator/
+│       ├── marketing-generator.json             ← workflow importabile (sanitizzato)
+│       └── README.md                            ← schema, nodi, istruzioni
 └── docs/
-    ├── guida_workflow_consulenza.html ← guida dettagliata passo-passo
-    └── guida_workflow_progetto1.html  ← guida dettagliata passo-passo
+    ├── guida_workflow_consulenza.html            ← guida dettagliata passo-passo
+    ├── guida_workflow_progetto1.html             ← guida dettagliata passo-passo
+    └── guida_workflow_marketing_generator.html   ← guida dettagliata con schema a colori
 ```
 
 ---
@@ -100,6 +114,9 @@ Introduce l'esecuzione parallela, l'integrazione con un LLM tramite AI Agent sub
 
 **02 — Progetto1 (Avanzato)**  
 Introduce la gestione di dati binari (file upload → base64 → binary), la chiamata diretta a un'API REST con payload JSON dinamico composto da nodi non contigui, e il branching condizionale con gestione esplicita degli errori.
+
+**03 — Marketing Generator (Esperto)**  
+Introduce il fork parallelo su tre branch AI simultanei, l'uso di `gpt-4o-search-preview` (web search) via chiamata HTTP diretta, i sub-node LLM con connessione `ai_languageModel`, il Merge by position, e la pipeline completa Docs → PDF → email con rinomina binaria via Code node.
 
 ---
 

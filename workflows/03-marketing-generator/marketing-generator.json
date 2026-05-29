@@ -1,0 +1,339 @@
+{
+  "name": "Marketing generator",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-1296, -16],
+      "id": "4209f198-6a2a-4539-8975-a696ba0abaa5",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YOUR_SHEET_GID",
+          "mode": "list",
+          "cachedResultName": "Articoli sportivi"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Promozione",
+              "lookupValue": "si"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [-1088, -16],
+      "id": "00f77572-4f25-4d1f-a6b8-293181c411a1",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "Quantità",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [-880, -16],
+      "id": "5150a807-2502-4b33-b90d-fd127ae572e5",
+      "name": "Sort"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [-672, -16],
+      "id": "243f4eb4-342e-4275-88b0-01b957a13a52",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-search-preview\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Sei un Senior Marketing Strategist e Trend Analyst di fama mondiale. Il tuo compito è generare report di mercato altamente dettagliati, professionali e basati su dati in tempo reale. Il tuo output deve essere strutturato per essere immediatamente utilizzabile per creare campagne di marketing. Usa un tono professionale, analitico ma persuasivo. Rispondi rigorosamente in Italiano.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Analizza il seguente prodotto/argomento: \\\"{{ $json.Nome }}\\\". \\n\\nEsegui una ricerca approfondita sul web e genera un report dettagliato che includa:\\n1. **Panoramica del Mercato Attuale**: Cosa dicono le ultime notizie?\\n2. **Trending Topics & Viralità**: Quali sono le mode, i meme o le discussioni social attive ORA su questo argomento?\\n3. **Analisi del Target Audience**: Chi sta comprando o parlando di questo oggi (Gen Z, Millennials, professionisti)?\\n4. **Keywords e Hashtag Performanti**: Elenco di parole chiave SEO e hashtag per Instagram/TikTok.\\n5. **Angoli di Marketing Suggeriti**: 3 idee creative per campagne pubblicitarie basate sui trend trovati.\\n\\nAssicurati di citare fatti recenti e concreti.\"\n    }\n  ],\n  \"max_tokens\": 2000\n}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [-448, -16],
+      "id": "1bb88e1a-ce80-412a-9465-a274aeb0fb13",
+      "name": "HTTP Request a OpenAI Search",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_OPENAI_HEADER_CREDENTIAL_ID",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Sei un Senior Social Media Manager specializzato in copywriting persuasivo e diretto.\nIl tuo compito è creare un post social basato su un report di mercato.\n\nINPUT REPORT:\n\"\"\"\n{{ $json.choices[0].message.content }}\n\"\"\"\n\nISTRUZIONI:\nScrivi un singolo post social (ottimizzato per Instagram/LinkedIn) basato sui trend più caldi emersi nel report qui sopra.\nIl post deve essere:\n1. Diretto e senza fronzoli (niente \"Ciao a tutti\" o introduzioni lunghe).\n2. Usare emoji strategiche ma non eccessive.\n3. Avere un tono urgente e accattivante (\"FOMO\").\n\nSTRUTTURA OBBLIGATORIA:\n[Gancio/Titolo in maiuscolo che attira l'attenzione]\n[Corpo del testo: 2 frasi potenti sul perché questo trend è importante ora]\n[Call to Action chiara]\n[3 Hashtag virali estratti dal report]\n\nRispondi SOLO con il testo del post.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [-160, -304],
+      "id": "08591ae9-136c-40df-a1a6-1b3fbcac5bff",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Sei un Senior AI Art Director specializzato in Midjourney, FLUX e Nano Banana Pro.\nIl tuo compito è convertire un'analisi di mercato in un prompt visivo tecnico.\n\nINPUT REPORT:\n\"\"\"\n{{ $json.choices[0].message.content }}\n\"\"\"\n\nISTRUZIONI:\nAnalizza il report e visualizza l'immagine pubblicitaria perfetta per questo trend.\nScrivi un PROMPT TECNICO IN INGLESE ottimizzato per la generazione di immagini.\n\nREGOLE RIGIDE:\n1. Output SOLO in INGLESE (i motori grafici non capiscono bene l'italiano).\n2. Nessuna introduzione (niente \"Here is the prompt\"). Inizia subito con il soggetto.\n3. Usa una struttura densa, separata da virgole.\n\nSTRUTTURA DEL PROMPT:\n[Soggetto Principale Dettagliato], [Azione o Contesto specifico del trend], [Illuminazione: es. Cinematic lighting, Volumetric fog, Golden hour], [Angolo Camera: es. Wide angle, Macro shot, Drone view], [Stile e Qualità: es. 8k, Hyperrealistic, Unreal Engine 5 render, Product photography].\n\nGenera ora solo la stringa del prompt.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [-160, -16],
+      "id": "b7fd54d7-2fb7-4343-b223-6b2f3b265abf",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Sei un Regista Cinematografico esperto in AI Video Generation (Google Veo, Sora, Runway).\nIl segreto di un buon video AI è descrivere il MOVIMENTO.\n\nINPUT REPORT:\n\"\"\"\n{{ $json.choices[0].message.content }}\n\"\"\"\n\nISTRUZIONI:\nCrea un prompt tecnico in INGLESE per generare una clip video di 5 secondi ad alto impatto virale basata sui trend del report.\n\nREGOLE RIGIDE:\n1. Output SOLO in INGLESE.\n2. Devi descrivere esplicitamente la FISICA e il MOVIMENTO.\n3. Nessuna introduzione, solo il prompt.\n\nSTRUTTURA DEL PROMPT:\n[Descrizione della Scena], [MOVIMENTO DEL SOGGETTO: es. The subject is running fast, The product is rotating slowly, Water is splashing], [MOVIMENTO DELLA CAMERA: es. Drone shot flying forward, Slow zoom in, Pan right], [Stile: es. 4k, Photorealistic, Cinematic depth of field].\n\nGenera ora solo la stringa del prompt.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [-160, 272],
+      "id": "56507e8d-e02e-4d34-ba44-adf5a028abc5",
+      "name": "Basic LLM Chain2"
+    },
+    {
+      "parameters": {
+        "model": { "__rl": true, "value": "gpt-4o", "mode": "list", "cachedResultName": "gpt-4o" },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [-80, -160],
+      "id": "3b681d74-d35b-4a20-80e0-6f63fb234342",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_API_CREDENTIAL_ID",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": { "__rl": true, "value": "gpt-4o", "mode": "list", "cachedResultName": "gpt-4o" },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [-80, 128],
+      "id": "d8a96aad-08c2-429d-92f4-f98fb493a83f",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_API_CREDENTIAL_ID",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": { "__rl": true, "value": "gpt-4o", "mode": "list", "cachedResultName": "gpt-4o" },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [-80, 448],
+      "id": "265700d3-8f4d-4038-8bc8-c0be64600940",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_API_CREDENTIAL_ID",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [{ "id": "d84a5b4f-0c23-4506-8669-fa2283c19014", "name": "Social", "value": "={{ $json.text }}", "type": "string" }] },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [192, -304],
+      "id": "fde2c510-8830-474f-8939-047f13eb9512",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [{ "id": "7027fcfb-de20-4906-8a3f-c49cff2c0abb", "name": "Image", "value": "={{ $json.text }}", "type": "string" }] },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [192, -16],
+      "id": "b05900b2-9631-41fd-8e9d-1224467c1f00",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [{ "id": "2da66ac7-a8a8-4e4d-a7ef-8ebba36db670", "name": "Video", "value": "={{ $json.text }}", "type": "string" }] },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [192, 272],
+      "id": "4e913852-4b63-4921-ba72-ed2ea840c939",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [432, -32],
+      "id": "768f56b7-42bd-485f-8d62-05b30799c2e5",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "Nuovo Report Marketing Pronto",
+        "message": "In allegato trovi il report strategico completo.",
+        "options": {
+          "attachmentsUi": { "attachmentsBinary": [{}] }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [1168, -16],
+      "id": "595a26da-771d-4ba5-8d83-32c1e1408df5",
+      "name": "Send a message",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "=REPORT STRATEGICO\n=================\n\nSocial\n\n{{ $json.Social }}\n\nimage\n\n\n{{ $json.Image }}\n\nVideo\n\n{{ $json.Video }}",
+        "driveId": { "__rl": true, "mode": "list", "value": "My Drive" },
+        "folderId": { "__rl": true, "mode": "list", "value": "root", "cachedResultName": "/ (Root folder)" },
+        "options": { "convertToGoogleDocument": true }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [640, -16],
+      "id": "8f53f608-761b-4e1e-b147-caa2a1d9bc86",
+      "name": "Creo un DOCS",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": { "__rl": true, "value": "={{ $json.id }}", "mode": "id" },
+        "options": {
+          "googleFileConversion": {
+            "conversion": { "docsToFormat": "application/pdf" }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [848, -16],
+      "id": "93c10c78-4aca-4ea9-b235-682a7bddf928",
+      "name": "Coverto in PDF",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const oggi = new Date().toISOString().slice(0, 10);\nconst nuovoNome = `Report_Strategico_${oggi}.pdf`;\n\nif ($input.item.binary && $input.item.binary.data) {\n  $input.item.binary.data.fileName = nuovoNome;\n}\n\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1008, -16],
+      "id": "b93446f7-a0de-415d-998d-38ba54f8c587",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": { "main": [[{ "node": "Get row(s) in sheet", "type": "main", "index": 0 }]] },
+    "Get row(s) in sheet": { "main": [[{ "node": "Sort", "type": "main", "index": 0 }]] },
+    "Sort": { "main": [[{ "node": "Limit", "type": "main", "index": 0 }]] },
+    "Limit": { "main": [[{ "node": "HTTP Request a OpenAI Search", "type": "main", "index": 0 }]] },
+    "HTTP Request a OpenAI Search": {
+      "main": [[
+        { "node": "Basic LLM Chain", "type": "main", "index": 0 },
+        { "node": "Basic LLM Chain1", "type": "main", "index": 0 },
+        { "node": "Basic LLM Chain2", "type": "main", "index": 0 }
+      ]]
+    },
+    "OpenAI Chat Model": { "ai_languageModel": [[{ "node": "Basic LLM Chain", "type": "ai_languageModel", "index": 0 }]] },
+    "OpenAI Chat Model1": { "ai_languageModel": [[{ "node": "Basic LLM Chain1", "type": "ai_languageModel", "index": 0 }]] },
+    "OpenAI Chat Model2": { "ai_languageModel": [[{ "node": "Basic LLM Chain2", "type": "ai_languageModel", "index": 0 }]] },
+    "Basic LLM Chain": { "main": [[{ "node": "Edit Fields", "type": "main", "index": 0 }]] },
+    "Basic LLM Chain1": { "main": [[{ "node": "Edit Fields1", "type": "main", "index": 0 }]] },
+    "Basic LLM Chain2": { "main": [[{ "node": "Edit Fields2", "type": "main", "index": 0 }]] },
+    "Edit Fields": { "main": [[{ "node": "Merge", "type": "main", "index": 0 }]] },
+    "Edit Fields1": { "main": [[{ "node": "Merge", "type": "main", "index": 1 }]] },
+    "Edit Fields2": { "main": [[{ "node": "Merge", "type": "main", "index": 2 }]] },
+    "Merge": { "main": [[{ "node": "Creo un DOCS", "type": "main", "index": 0 }]] },
+    "Creo un DOCS": { "main": [[{ "node": "Coverto in PDF", "type": "main", "index": 0 }]] },
+    "Coverto in PDF": { "main": [[{ "node": "Code in JavaScript", "type": "main", "index": 0 }]] },
+    "Code in JavaScript": { "main": [[{ "node": "Send a message", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "1hRhUQ8JI2zH6ZJN",
+  "tags": []
+}
