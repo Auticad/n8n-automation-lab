@@ -13,6 +13,7 @@ Una collezione di workflow n8n organizzati per **livello di complessità crescen
 | 01 | [Consulenza](workflows/01-consulenza/) | ⚡⚡ Intermedio | Form pubblico | Google Sheets, Gemini, Gmail, AI Agent | [HTML](docs/guida_workflow_consulenza.html) |
 | 02 | [Progetto1](workflows/02-progetto1/) | ⚡⚡⚡ Avanzato | Form con upload | Gemini API (HTTP), Google Drive, dati binari, If | [HTML](docs/guida_workflow_progetto1.html) |
 | 03 | [Marketing Generator](workflows/03-marketing-generator/) | ⚡⚡⚡⚡ Esperto | Manuale | OpenAI Search, gpt-4o (×3), Google Sheets, Drive, Gmail, fork parallelo | [HTML](docs/guida_workflow_marketing_generator.html) |
+| 04 | [Video VEO3.1 KIE AI](workflows/04-video-veo31-kie-ai/) | ⚡⚡⚡⚡ Esperto | Form con upload | gpt-4o, KIE AI Veo 3.1, binary upload, polling loop, Gmail | [HTML](docs/guida_workflow_video_veo31.html) |
 
 > Il workflow **GMAIL** (base) non è incluso perché considerato troppo semplice per documentazione dedicata.
 
@@ -65,6 +66,9 @@ Incolla la tua chiave `sk-...`
 - Name: `Authorization`  
 - Value: `Bearer sk-...` (la stessa chiave OpenAI)
 
+**KIE AI API Key (per Video VEO3.1)**  
+Non usa credenziali n8n native — il Bearer token va inserito direttamente nel campo `value` dell'header nei nodi HTTP Request (upload, submit, status). Formato: `Bearer KIE_YOUR_API_KEY`
+
 ---
 
 ## Valori da sostituire nei JSON
@@ -94,13 +98,17 @@ n8n-automation-lab/
 │   ├── 02-progetto1/
 │   │   ├── progetto1.json                       ← workflow importabile (sanitizzato)
 │   │   └── README.md                            ← schema, nodi, istruzioni
-│   └── 03-marketing-generator/
-│       ├── marketing-generator.json             ← workflow importabile (sanitizzato)
+│   ├── 03-marketing-generator/
+│   │   ├── marketing-generator.json             ← workflow importabile (sanitizzato)
+│   │   └── README.md                            ← schema, nodi, istruzioni
+│   └── 04-video-veo31-kie-ai/
+│       ├── video-veo31-kie-ai.json              ← workflow importabile (sanitizzato)
 │       └── README.md                            ← schema, nodi, istruzioni
 └── docs/
     ├── guida_workflow_consulenza.html            ← guida dettagliata passo-passo
     ├── guida_workflow_progetto1.html             ← guida dettagliata passo-passo
-    └── guida_workflow_marketing_generator.html   ← guida dettagliata con schema a colori
+    ├── guida_workflow_marketing_generator.html   ← guida dettagliata con schema a colori
+    └── guida_workflow_video_veo31.html           ← guida dettagliata con schema a colori
 ```
 
 ---
@@ -117,6 +125,9 @@ Introduce la gestione di dati binari (file upload → base64 → binary), la chi
 
 **03 — Marketing Generator (Esperto)**  
 Introduce il fork parallelo su tre branch AI simultanei, l'uso di `gpt-4o-search-preview` (web search) via chiamata HTTP diretta, i sub-node LLM con connessione `ai_languageModel`, il Merge by position, e la pipeline completa Docs → PDF → email con rinomina binaria via Code node.
+
+**04 — Video VEO3.1 KIE AI (Esperto)**  
+Introduce il Form Trigger con upload file binario, l'estrazione manuale del binario via Code (base64), il pattern polling loop (HTTP + If + Wait) per API asincrone, e l'integrazione con KIE AI Veo 3.1 in modalità REFERENCE_2_VIDEO. Aggiunge il download del video come file binario (Response Format: File) e l'invio via Gmail come allegato — con la distinzione critica tra URL stringa e campo binario nell'Attachment Field Name.
 
 ---
 

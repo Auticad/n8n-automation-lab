@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guida Workflow · Video VEO3.1 KIE AI</title>
+<style>
+  :root {
+    --indigo: #4f46e5;
+    --indigo-light: #eef2ff;
+    --indigo-border: #c7d2fe;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --green-border: #bbf7d0;
+    --purple: #7c3aed;
+    --purple-light: #faf5ff;
+    --purple-border: #e9d5ff;
+    --orange: #ea580c;
+    --orange-light: #fff7ed;
+    --orange-border: #fed7aa;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --blue-border: #bfdbfe;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --red-border: #fecaca;
+    --teal: #0d9488;
+    --teal-light: #f0fdfa;
+    --teal-border: #99f6e4;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --amber-border: #fde68a;
+    --cyan: #0891b2;
+    --cyan-light: #ecfeff;
+    --cyan-border: #a5f3fc;
+    --gray-900: #111827;
+    --gray-700: #374151;
+    --gray-500: #6b7280;
+    --gray-200: #e5e7eb;
+    --gray-100: #f3f4f6;
+    --gray-50: #f9fafb;
+    --navy: #1e3a5f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--gray-700);
+    background: #eef0f4;
+    padding: 32px 16px;
+  }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 32px rgba(0,0,0,.09);
+    overflow: hidden;
+  }
+
+  .page-header {
+    background: linear-gradient(135deg, #0c1f3f 0%, #1e3a5f 60%, #0d9488 100%);
+    padding: 44px 52px 40px;
+    color: #fff;
+  }
+  .page-header .label {
+    font-size: 11px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: #5eead4; margin-bottom: 10px;
+  }
+  .page-header h1 { font-size: 34px; font-weight: 800; color: #fff; line-height: 1.15; }
+  .page-header .sub { margin-top: 8px; font-size: 15px; color: #99f6e4; }
+  .page-header .meta { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .page-header .meta span {
+    font-size: 12px; color: #5eead4;
+    background: rgba(255,255,255,.1);
+    padding: 4px 12px; border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.15);
+  }
+
+  .toc {
+    background: var(--teal-light);
+    border-bottom: 1px solid var(--teal-border);
+    padding: 18px 52px; display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .toc a {
+    font-size: 12.5px; color: var(--teal); text-decoration: none;
+    padding: 4px 13px; border-radius: 20px; background: #fff;
+    border: 1px solid var(--teal-border); font-weight: 500;
+  }
+  .toc a:hover { background: var(--teal-border); }
+
+  .content { padding: 52px; }
+  section { margin-bottom: 56px; }
+
+  .section-title {
+    font-size: 19px; font-weight: 800; color: var(--navy);
+    padding-bottom: 12px; border-bottom: 2px solid var(--teal-border);
+    margin-bottom: 24px;
+  }
+
+  p { margin-bottom: 14px; }
+  code { background: var(--gray-100); padding: 2px 7px; border-radius: 5px; font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace; }
+  pre { background: var(--gray-900); color: #e2e8f0; padding: 20px 24px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; font-family: 'SF Mono', 'Fira Code', monospace; margin: 16px 0; }
+
+  /* FLOW SCHEMA */
+  .flow-wrapper {
+    background: #f8fafc;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 32px 24px;
+    overflow-x: auto;
+  }
+
+  .flow-legend {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 28px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray-700); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  .flow-linear {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 16px; flex-wrap: nowrap; overflow-x: auto;
+  }
+  .flow-arrow { color: var(--gray-500); font-size: 18px; padding: 0 6px; flex-shrink: 0; }
+
+  .node {
+    display: inline-flex; flex-direction: column; align-items: center;
+    min-width: 110px; max-width: 135px; flex-shrink: 0; text-align: center;
+  }
+  .node-box {
+    width: 100%; padding: 10px 8px; border-radius: 10px; border: 2px solid;
+    font-size: 11.5px; font-weight: 700; line-height: 1.3; text-align: center;
+  }
+  .node-sub { font-size: 10px; font-weight: 400; margin-top: 3px; opacity: .75; }
+
+  .node-gray .node-box   { background: var(--gray-100); border-color: var(--gray-200); color: var(--gray-700); }
+  .node-green .node-box  { background: var(--green-light); border-color: var(--green-border); color: #15803d; }
+  .node-blue .node-box   { background: var(--blue-light); border-color: var(--blue-border); color: var(--blue); }
+  .node-orange .node-box { background: var(--orange-light); border-color: var(--orange-border); color: var(--orange); }
+  .node-purple .node-box { background: var(--purple-light); border-color: var(--purple-border); color: var(--purple); }
+  .node-amber .node-box  { background: var(--amber-light); border-color: var(--amber-border); color: var(--amber); }
+  .node-teal .node-box   { background: var(--teal-light); border-color: var(--teal-border); color: var(--teal); }
+  .node-cyan .node-box   { background: var(--cyan-light); border-color: var(--cyan-border); color: var(--cyan); }
+  .node-red .node-box    { background: var(--red-light); border-color: var(--red-border); color: var(--red); }
+
+  /* FORK 2 BRANCH */
+  .fork-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--green); margin-bottom: 10px;
+    padding: 4px 12px; background: var(--green-light); border-radius: 6px; display: inline-block;
+  }
+  .branches { display: flex; flex-direction: column; gap: 10px; padding-left: 16px; border-left: 3px solid var(--green-border); margin-left: 6px; }
+  .branch { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; }
+  .branch-label { font-size: 10.5px; font-weight: 700; color: var(--gray-500); min-width: 60px; flex-shrink: 0; }
+
+  /* POLLING LOOP */
+  .loop-wrapper {
+    border: 2px dashed var(--cyan-border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    background: var(--cyan-light);
+    margin-top: 8px;
+    position: relative;
+  }
+  .loop-label {
+    position: absolute; top: -12px; left: 14px;
+    background: var(--cyan-light); padding: 2px 10px;
+    font-size: 11px; font-weight: 700; color: var(--cyan);
+    text-transform: uppercase; letter-spacing: .08em;
+    border: 1px solid var(--cyan-border); border-radius: 20px;
+  }
+
+  /* NODE CARD */
+  .node-card { border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+  .node-card-header {
+    padding: 14px 20px; display: flex; align-items: center; gap: 12px;
+  }
+  .node-card-header .num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; flex-shrink: 0;
+  }
+  .node-card-header .name { font-size: 15px; font-weight: 700; }
+  .node-card-header .type { font-size: 12px; opacity: .7; margin-left: auto; }
+
+  .card-gray   .node-card-header { background: var(--gray-100); }
+  .card-gray   .node-card-header .num { background: var(--gray-200); color: var(--gray-700); }
+  .card-green  .node-card-header { background: var(--green-light); }
+  .card-green  .node-card-header .num { background: var(--green-border); color: #15803d; }
+  .card-blue   .node-card-header { background: var(--blue-light); }
+  .card-blue   .node-card-header .num { background: var(--blue-border); color: var(--blue); }
+  .card-orange .node-card-header { background: var(--orange-light); }
+  .card-orange .node-card-header .num { background: var(--orange-border); color: var(--orange); }
+  .card-purple .node-card-header { background: var(--purple-light); }
+  .card-purple .node-card-header .num { background: var(--purple-border); color: var(--purple); }
+  .card-amber  .node-card-header { background: var(--amber-light); }
+  .card-amber  .node-card-header .num { background: var(--amber-border); color: var(--amber); }
+  .card-teal   .node-card-header { background: var(--teal-light); }
+  .card-teal   .node-card-header .num { background: var(--teal-border); color: var(--teal); }
+  .card-cyan   .node-card-header { background: var(--cyan-light); }
+  .card-cyan   .node-card-header .num { background: var(--cyan-border); color: var(--cyan); }
+  .card-red    .node-card-header { background: var(--red-light); }
+  .card-red    .node-card-header .num { background: var(--red-border); color: var(--red); }
+
+  .node-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .node-table th, .node-table td { padding: 9px 12px; text-align: left; font-size: 13.5px; border-bottom: 1px solid var(--gray-100); }
+  .node-table th { font-weight: 700; color: var(--navy); background: var(--gray-50); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .node-table tr:last-child td { border-bottom: none; }
+  .node-table td:first-child { font-weight: 600; color: var(--gray-700); width: 26%; }
+
+  .info-box { background: var(--indigo-light); border: 1px solid var(--indigo-border); border-radius: 10px; padding: 16px 20px; margin-top: 14px; font-size: 13.5px; }
+  .warn-box { background: var(--amber-light); border: 1px solid var(--amber-border); border-radius: 10px; padding: 16px 20px; margin-top: 14px; font-size: 13.5px; }
+  .key-box  { background: var(--teal-light); border: 1px solid var(--teal-border); border-radius: 10px; padding: 16px 20px; margin-top: 14px; font-size: 13.5px; }
+
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li { counter-increment: steps; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; font-size: 14px; }
+  .step-list li::before {
+    content: counter(steps); min-width: 26px; height: 26px;
+    background: var(--navy); color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; flex-shrink: 0; margin-top: 1px;
+  }
+
+  .prereq-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-top: 8px; }
+  .prereq-item { border: 1px solid var(--gray-200); border-radius: 10px; padding: 14px 16px; font-size: 13.5px; }
+  .prereq-item strong { display: block; margin-bottom: 4px; color: var(--navy); }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; border-radius: 0; }
+    pre { border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header">
+    <div class="label">n8n Workflow · 04</div>
+    <h1>Video VEO3.1 KIE AI</h1>
+    <div class="sub">Form con upload immagine → prompt AI → generazione video con Veo 3.1 → polling loop fino al completamento</div>
+    <div class="meta">
+      <span>⚡⚡⚡⚡ Esperto</span>
+      <span>13 nodi</span>
+      <span>Trigger: Form pubblico</span>
+      <span>OpenAI gpt-4o · KIE AI Veo 3.1 · polling loop · Gmail</span>
+      <span>ID: ZIF33JHTseYS3iSg</span>
+    </div>
+  </div>
+
+  <div class="toc">
+    <a href="#overview">Panoramica</a>
+    <a href="#schema">Schema a colori</a>
+    <a href="#nodi">Tutti i nodi</a>
+    <a href="#prerequisiti">Prerequisiti</a>
+    <a href="#configurazione">Configurazione</a>
+    <a href="#concetti">Concetti chiave</a>
+  </div>
+
+  <div class="content">
+
+    <!-- 1. PANORAMICA -->
+    <section id="overview">
+      <div class="section-title">1. Panoramica</div>
+      <p>Il workflow riceve tramite form pubblico una descrizione testuale del video, uno stile visivo e un'immagine del prodotto da usare come riferimento. Dal trigger si diramano immediatamente due branch paralleli: uno genera il prompt video in inglese tramite <code>gpt-4o</code>, l'altro converte l'immagine in base64 e la carica su un server temporaneo KIE AI per ottenerne un URL pubblico.</p>
+      <p>I due branch vengono ricombinati e il workflow chiama l'API <strong>KIE AI Veo 3.1</strong> per avviare la generazione video in modalità <code>REFERENCE_2_VIDEO</code> — il video viene generato usando l'immagine come riferimento visivo. La generazione video non è sincrona: il workflow implementa un <strong>polling loop</strong> che interroga l'API ogni 60 secondi fino a quando il campo <code>data.completeTime</code> non è valorizzato, indicando il completamento.</p>
+      <p><strong>Tecnologie principali:</strong> n8n Form Trigger (con upload file binario) → gpt-4o LLM Chain (generazione prompt) + Code JS (base64 extraction) → KIE AI file upload API → KIE AI Veo 3.1 video generation API → polling loop (Wait + If).</p>
+    </section>
+
+    <!-- 2. SCHEMA A COLORI -->
+    <section id="schema">
+      <div class="section-title">2. Schema a colori del flusso</div>
+
+      <div class="flow-wrapper">
+
+        <!-- Legenda -->
+        <div class="flow-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#bbf7d0;border:1.5px solid #16a34a"></div> Form Trigger</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e9d5ff;border:1.5px solid #7c3aed"></div> AI / LLM</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#bfdbfe;border:1.5px solid #2563eb"></div> Utility (Set / Merge)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fde68a;border:1.5px solid #d97706"></div> Code JS</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fed7aa;border:1.5px solid #ea580c"></div> HTTP Request (upload)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#99f6e4;border:1.5px solid #0d9488"></div> KIE AI API (submit / status)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fecaca;border:1.5px solid #dc2626"></div> If (condizione)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#a5f3fc;border:1.5px solid #0891b2"></div> Wait (loop)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fecaca;border:1.5px solid #dc2626"></div> Gmail (email)</div>
+        </div>
+
+        <!-- FASE 1: form + fork -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);margin-bottom:10px;">Fase 1 — Ricezione e fork parallelo</div>
+        <div class="flow-linear" style="margin-bottom:20px;">
+          <div class="node node-green">
+            <div class="node-box">On form submission<div class="node-sub">Form Trigger</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div style="font-size:20px;color:var(--green);padding:0 8px;">⑃</div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <div class="fork-label">⑃ Fork dal form trigger</div>
+          <div class="branches">
+
+            <div class="branch">
+              <div class="branch-label" style="color:#7c3aed">Branch A</div>
+              <div class="node node-purple" style="min-width:100px"><div class="node-box">LLM Chain<div class="node-sub">Prompt video</div></div></div>
+              <div class="flow-arrow">→</div>
+              <div class="node node-purple" style="min-width:90px"><div class="node-box">OpenAI<div class="node-sub">gpt-4o</div></div></div>
+              <div class="flow-arrow">→</div>
+              <div class="node node-blue" style="min-width:90px"><div class="node-box">Edit Fields<div class="node-sub">"prompt"</div></div></div>
+              <div class="flow-arrow" style="color:#2563eb">⤵</div>
+            </div>
+
+            <div class="branch">
+              <div class="branch-label" style="color:#d97706">Branch B</div>
+              <div class="node node-amber" style="min-width:100px"><div class="node-box">Code JS<div class="node-sub">→ base64</div></div></div>
+              <div class="flow-arrow">→</div>
+              <div class="node node-orange" style="min-width:100px"><div class="node-box">HTTP Upload<div class="node-sub">KIE file API</div></div></div>
+              <div class="flow-arrow" style="color:#2563eb">⤵</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- FASE 2: merge + submit -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);margin-bottom:10px;">Fase 2 — Ricombinazione e avvio generazione</div>
+        <div class="flow-linear" style="margin-bottom:20px;">
+          <div class="node node-blue">
+            <div class="node-box">Merge<div class="node-sub">2 input → 1</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="node node-teal">
+            <div class="node-box">Submit Veo Task<div class="node-sub">KIE Veo 3.1 API</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div style="font-size:20px;color:var(--teal);padding:0 4px;">↴</div>
+        </div>
+
+        <!-- FASE 3: polling loop -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);margin-bottom:10px;">Fase 3 — Polling loop fino al completamento</div>
+        <div class="loop-wrapper" style="margin-bottom:20px;">
+          <div class="loop-label">🔄 Polling Loop</div>
+          <div class="flow-linear" style="margin-bottom:0;flex-wrap:wrap;gap:4px;">
+            <div class="node node-teal">
+              <div class="node-box">HTTP Request1<div class="node-sub">Controlla status</div></div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="node node-red">
+              <div class="node-box">If<div class="node-sub">completeTime ≠ ∅?</div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;padding:0 8px;">
+              <div style="font-size:11px;color:#15803d;font-weight:700;">True ↓</div>
+              <div style="font-size:11px;color:#0891b2;font-weight:700;">False →</div>
+            </div>
+            <div class="node node-cyan">
+              <div class="node-box">Wait 60s<div class="node-sub">Aspetta 1 min</div></div>
+            </div>
+            <div style="font-size:11px;color:var(--cyan);font-weight:700;align-self:center;padding:0 4px;">↩ loop</div>
+          </div>
+        </div>
+
+        <!-- FASE 4: download + email -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);margin-bottom:10px;">Fase 4 — Download video e invio email (output True dell'If)</div>
+        <div class="flow-linear">
+          <div class="node node-teal">
+            <div class="node-box">Download Video<div class="node-sub">GET MP4 → binario</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="node node-red">
+            <div class="node-box">Send a message<div class="node-sub">Gmail + allegato</div></div>
+          </div>
+        </div>
+
+      </div><!-- /flow-wrapper -->
+    </section>
+
+    <!-- 3. TUTTI I NODI -->
+    <section id="nodi">
+      <div class="section-title">3. Tutti i nodi — configurazione dettagliata</div>
+
+      <!-- NODO 1 -->
+      <div class="node-card card-green">
+        <div class="node-card-header">
+          <div class="num" style="background:#bbf7d0;color:#15803d">1</div>
+          <div class="name">On form submission</div>
+          <div class="type">Form Trigger</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Campo</th><th>Tipo</th><th>Configurazione</th></tr>
+            <tr><td>Titolo form</td><td>—</td><td>"Generatore di video marketing"</td></tr>
+            <tr><td>Descrivi il video</td><td>Textarea (obbligatorio)</td><td>Placeholder: "es: uno sportivo corre con la borraccia «Extreme»"</td></tr>
+            <tr><td>Seleziona uno stile</td><td>Dropdown (obbligatorio)</td><td>Realismo cinematografico · Iperrealismo · Animazione stilizzata · Stile documentaristico · Estetica futuristica</td></tr>
+            <tr><td>Carica immagine prodotto</td><td>File upload (obbligatorio)</td><td>File singolo — arriva come dato binario in n8n</td></tr>
+          </table>
+          <div class="info-box">Il trigger genera un URL pubblico (webhook) accessibile dall'esterno. L'immagine caricata è disponibile nel <code>binary</code> dell'item, non nel <code>json</code>. Questo è il motivo per cui il Branch B parte con un nodo Code che estrae il binario manualmente.</div>
+        </div>
+      </div>
+
+      <!-- NODO 2: Code JS -->
+      <div class="node-card card-amber">
+        <div class="node-card-header">
+          <div class="num" style="background:#fde68a;color:#d97706">2</div>
+          <div class="name">Code in JavaScript</div>
+          <div class="type">Code (Branch B)</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Linguaggio</td><td>JavaScript</td></tr>
+            <tr><td>Output</td><td><code>base64_string</code>, <code>mime_type</code>, <code>original_field_name</code></td></tr>
+          </table>
+          <pre>for (const item of $input.all()) {
+  const binaryKeys = Object.keys(item.binary || {});
+  if (binaryKeys.length > 0) {
+    const firstBinaryKey = binaryKeys[0];
+    const binaryData = item.binary[firstBinaryKey];
+    item.json.base64_string = binaryData.data;
+    item.json.mime_type = binaryData.mimeType;
+    item.json.original_field_name = firstBinaryKey;
+  } else {
+    item.json.error_debug = "Nessun dato binario trovato.";
+  }
+}
+return $input.all();</pre>
+          <div class="info-box">Il codice trova automaticamente il primo campo binario nell'item senza hardcodare il nome del campo. Questo lo rende robusto anche se il nome del campo nel form cambia. L'estrazione produce <code>base64_string</code> che viene passato al nodo HTTP successivo.</div>
+        </div>
+      </div>
+
+      <!-- NODO 3: HTTP Request upload -->
+      <div class="node-card card-orange">
+        <div class="node-card-header">
+          <div class="num" style="background:#fed7aa;color:#ea580c">3</div>
+          <div class="name">HTTP Request — Upload immagine</div>
+          <div class="type">HTTP Request (Branch B)</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Metodo</td><td>POST</td></tr>
+            <tr><td>URL</td><td><code>https://kieai.redpandaai.co/api/file-base64-upload</code></td></tr>
+            <tr><td>Auth</td><td>Bearer token (header Authorization)</td></tr>
+            <tr><td>Body param: base64Data</td><td><code>={{ $json.base64_string }}</code></td></tr>
+            <tr><td>Body param: uploadPath</td><td><code>images/base64</code></td></tr>
+            <tr><td>Body param: fileName</td><td><code>immagine_campione.png</code></td></tr>
+          </table>
+          <div class="info-box">L'API risponde con un JSON contenente <code>data.downloadUrl</code> — l'URL pubblico temporaneo dell'immagine caricata. Questo URL viene poi passato al nodo Merge e usato nel payload della richiesta di generazione video.</div>
+        </div>
+      </div>
+
+      <!-- NODO 4: LLM Chain -->
+      <div class="node-card card-purple">
+        <div class="node-card-header">
+          <div class="num" style="background:#e9d5ff;color:#7c3aed">4</div>
+          <div class="name">Basic LLM Chain + OpenAI Chat Model</div>
+          <div class="type">LLM Chain (Branch A)</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Tipo nodo</td><td><code>@n8n/n8n-nodes-langchain.chainLlm</code></td></tr>
+            <tr><td>Modello collegato</td><td>OpenAI Chat Model — <code>gpt-4o</code></td></tr>
+            <tr><td>Input dinamici</td><td><code>{{ $json['Descrivi il video'] }}</code> + <code>{{ $json['Seleziona uno stile'] }}</code></td></tr>
+            <tr><td>Lingua output</td><td>Inglese (obbligatorio — Veo 3.1 funziona meglio in EN)</td></tr>
+          </table>
+          <p style="padding:12px 12px 4px;font-size:13.5px;">Il prompt richiede a gpt-4o di generare un prompt video professionale seguendo la struttura:</p>
+          <pre>Soggetto → Ambiente/Background → Movimento Camera → Illuminazione e Colore → Qualità Tecnica</pre>
+          <div class="info-box">Il prompt è ottimizzato per Veo 3.1: niente etichette come "[Soggetto]", un unico paragrafo descrittivo in inglese. La struttura logica segue lo standard dei prompt video AI per garantire risultati coerenti.</div>
+          <div class="warn-box"><strong>Pin data attiva:</strong> nel JSON originale il nodo LLM Chain ha un <code>pinData</code> con un prompt di test pre-esistente. In produzione il pin data va rimosso per consentire l'esecuzione reale del LLM.</div>
+        </div>
+      </div>
+
+      <!-- NODO 5: Edit Fields -->
+      <div class="node-card card-blue">
+        <div class="node-card-header">
+          <div class="num" style="background:#bfdbfe;color:#2563eb">5</div>
+          <div class="name">Edit Fields</div>
+          <div class="type">Set (Branch A)</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Campo creato</td><td><code>prompt</code></td></tr>
+            <tr><td>Valore</td><td><code>={{ $json.text }}</code></td></tr>
+          </table>
+          <div class="info-box">Rinomina l'output del LLM Chain (che arriva come <code>text</code>) nel campo <code>prompt</code>, il nome atteso dal payload del nodo Merge e della chiamata API Veo.</div>
+        </div>
+      </div>
+
+      <!-- NODO 6: Merge -->
+      <div class="node-card card-blue">
+        <div class="node-card-header">
+          <div class="num" style="background:#bfdbfe;color:#2563eb">6</div>
+          <div class="name">Merge</div>
+          <div class="type">Merge</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Modalità</td><td>Combine by position</td></tr>
+            <tr><td>Input 0</td><td>Branch B — risultato upload immagine (contiene <code>data.downloadUrl</code>)</td></tr>
+            <tr><td>Input 1</td><td>Branch A — Edit Fields (contiene <code>prompt</code>)</td></tr>
+          </table>
+          <div class="info-box">Il Merge combina i campi dei due branch in un unico item che contiene sia <code>prompt</code> (dal Branch A) che <code>data.downloadUrl</code> (dal Branch B). Il nodo Submit_Veo_task legge entrambi tramite <code>{{ $json.prompt }}</code> e <code>{{ $json.data.downloadUrl }}</code>.</div>
+        </div>
+      </div>
+
+      <!-- NODO 7: Submit Veo -->
+      <div class="node-card card-teal">
+        <div class="node-card-header">
+          <div class="num" style="background:#99f6e4;color:#0d9488">7</div>
+          <div class="name">Submit_Veo_task</div>
+          <div class="type">HTTP Request — KIE AI</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Metodo</td><td>POST</td></tr>
+            <tr><td>URL</td><td><code>https://api.kie.ai/api/v1/veo/generate</code></td></tr>
+            <tr><td>Auth</td><td>Bearer token (header Authorization)</td></tr>
+            <tr><td>model</td><td><code>veo3_fast</code></td></tr>
+            <tr><td>aspectRatio</td><td><code>16:9</code></td></tr>
+            <tr><td>seeds</td><td><code>12345</code> (riproducibilità)</td></tr>
+            <tr><td>generationType</td><td><code>REFERENCE_2_VIDEO</code></td></tr>
+            <tr><td>enableFallback</td><td><code>false</code></td></tr>
+            <tr><td>enableTranslation</td><td><code>true</code></td></tr>
+          </table>
+          <p style="padding:12px 12px 4px;font-size:13.5px;">Il payload inviato è:</p>
+          <pre>{
+  "prompt": "{{ $json.prompt }}",
+  "imageUrls": ["{{ $json.data.downloadUrl }}"],
+  "model": "veo3_fast",
+  "aspectRatio": "16:9",
+  "seeds": 12345,
+  "enableFallback": false,
+  "enableTranslation": true,
+  "generationType": "REFERENCE_2_VIDEO"
+}</pre>
+          <div class="info-box"><strong>REFERENCE_2_VIDEO</strong>: la modalità usa l'immagine del prodotto caricata come riferimento visivo per guidare la generazione del video — il soggetto nel video sarà coerente con l'immagine fornita. La risposta contiene <code>data.taskId</code> usato nel polling.</div>
+          <div class="warn-box"><strong>veo3_fast</strong>: versione più veloce (e meno costosa) del modello. Usare <code>veo3</code> per qualità massima, con tempi di attesa più lunghi (il Wait potrebbe dover essere aumentato).</div>
+        </div>
+      </div>
+
+      <!-- NODO 8: HTTP Request1 -->
+      <div class="node-card card-teal">
+        <div class="node-card-header">
+          <div class="num" style="background:#99f6e4;color:#0d9488">8</div>
+          <div class="name">HTTP Request1 — Controlla status</div>
+          <div class="type">HTTP Request — KIE AI (polling)</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Metodo</td><td>GET</td></tr>
+            <tr><td>URL</td><td><code>https://api.kie.ai/api/v1/veo/record-info</code></td></tr>
+            <tr><td>Query param</td><td><code>taskId = {{ $json.data.taskId }}</code></td></tr>
+            <tr><td>Auth</td><td>Bearer token (header Authorization)</td></tr>
+          </table>
+          <div class="info-box">Interroga l'API KIE AI per sapere se il video è pronto. La risposta contiene <code>data.completeTime</code>: se è valorizzato (timestamp Unix), il video è completato e disponibile. Se è nullo o zero, la generazione è ancora in corso.</div>
+        </div>
+      </div>
+
+      <!-- NODO 9: If -->
+      <div class="node-card card-red">
+        <div class="node-card-header">
+          <div class="num" style="background:#fecaca;color:#dc2626">9</div>
+          <div class="name">If — Video completato?</div>
+          <div class="type">If (condizione)</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Condizione</td><td><code>data.completeTime</code> is not empty</td></tr>
+            <tr><td>Tipo</td><td>number · notEmpty</td></tr>
+            <tr><td>Output True (0)</td><td>Video pronto — branch non collegato (fine workflow)</td></tr>
+            <tr><td>Output False (1)</td><td>→ Wait_60s → torna a HTTP Request1</td></tr>
+          </table>
+          <div class="info-box">Il branch True (output 0) non ha nodi collegati nel workflow attuale — il video è pronto e il workflow termina. In una versione estesa si potrebbe aggiungere un nodo che notifica l'utente con l'URL del video o lo salva su Drive.</div>
+          <div class="warn-box"><strong>Attenzione ai loop infiniti:</strong> se l'API KIE AI restituisce un errore o il task fallisce, <code>completeTime</code> potrebbe non essere mai valorizzato e il loop non termina. Considera di aggiungere un contatore di iterazioni massime (es. 20 tentativi = 20 minuti) con un nodo Stop and Error.</div>
+        </div>
+      </div>
+
+      <!-- NODO 10: Wait -->
+      <div class="node-card card-cyan">
+        <div class="node-card-header">
+          <div class="num" style="background:#a5f3fc;color:#0891b2">10</div>
+          <div class="name">Wait_60s</div>
+          <div class="type">Wait</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Durata attesa</td><td>60 secondi</td></tr>
+            <tr><td>Output</td><td>→ HTTP Request1 (torna al controllo status)</td></tr>
+          </table>
+          <div class="info-box">Il nodo Wait sospende l'esecuzione per 60 secondi prima di ritentare il controllo. Con <code>veo3_fast</code> la generazione tipicamente richiede 2–5 minuti, quindi aspettarsi 2–5 iterazioni del loop prima del completamento.</div>
+        </div>
+      </div>
+
+      <!-- NODO 11: Download Video -->
+      <div class="node-card card-teal">
+        <div class="node-card-header">
+          <div class="num" style="background:#99f6e4;color:#0d9488">11</div>
+          <div class="name">Download Video</div>
+          <div class="type">HTTP Request — download binario</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Metodo</td><td>GET</td></tr>
+            <tr><td>URL</td><td><code>={{ $json.data.response.resultUrls[0] }}</code></td></tr>
+            <tr><td>Response Format</td><td><strong>File</strong> (opzione in Response → Response Format)</td></tr>
+            <tr><td>Output</td><td>Campo binario <code>data</code> contenente il file MP4</td></tr>
+          </table>
+          <div class="info-box">
+            <strong>Perché serve questo nodo:</strong> il nodo Gmail accetta allegati solo come <strong>dati binari</strong> presenti nell'item — non accetta URL stringa. Impostando Response Format = File, l'HTTP Request scarica il contenuto del video e lo salva nel campo binario <code>data</code>, che Gmail può allegare direttamente.
+          </div>
+          <div class="warn-box">
+            <strong>Errore frequente:</strong> passare <code>{{ $json.data.response.resultUrls[0] }}</code> direttamente al campo "Attachment Field Name" di Gmail produce l'errore <em>"binary file not found"</em> perché n8n cerca un campo binario con quel nome nell'item (che non esiste). Il campo deve essere sempre il nome del binario — in questo caso <code>data</code>.
+          </div>
+        </div>
+      </div>
+
+      <!-- NODO 12: Send a message (Gmail) -->
+      <div class="node-card card-red">
+        <div class="node-card-header">
+          <div class="num" style="background:#fecaca;color:#dc2626">12</div>
+          <div class="name">Send a message</div>
+          <div class="type">Gmail</div>
+        </div>
+        <div class="node-card-body">
+          <table class="node-table">
+            <tr><th>Parametro</th><th>Valore</th></tr>
+            <tr><td>Destinatario</td><td><code>YOUR_EMAIL@gmail.com</code> (placeholder)</td></tr>
+            <tr><td>Oggetto</td><td>"Video generato con Veo3.1"</td></tr>
+            <tr><td>Tipo email</td><td>HTML</td></tr>
+            <tr><td>Corpo</td><td>"Video generato con Veo3.1"</td></tr>
+            <tr><td>Attachment Field Name</td><td><code>data</code> — nome del campo binario prodotto dal nodo Download Video</td></tr>
+            <tr><td>Credenziale</td><td>Google OAuth2 (Gmail)</td></tr>
+          </table>
+          <div class="info-box">Il campo "Attachment Field Name" contiene la parola <code>data</code> — non un'espressione, non un URL. È il nome del campo binario nell'item corrente, creato dal nodo Download Video. Il file allegato sarà il video MP4 generato da Veo 3.1.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 4. PREREQUISITI -->
+    <section id="prerequisiti">
+      <div class="section-title">4. Prerequisiti</div>
+      <div class="prereq-grid">
+        <div class="prereq-item">
+          <strong>n8n</strong>
+          Istanza locale o cloud. Versione ≥ 1.x per i nodi LangChain. Il Form Trigger richiede che n8n sia accessibile pubblicamente (o via tunnel) per mostrare il form.
+        </div>
+        <div class="prereq-item">
+          <strong>OpenAI API Key</strong>
+          Credenziale <strong>OpenAI API</strong> nativa per il nodo LLM Chain (gpt-4o).
+        </div>
+        <div class="prereq-item">
+          <strong>KIE AI API Key</strong>
+          Chiave API per <a href="https://kie.ai" target="_blank">kie.ai</a>. Usata in entrambi gli HTTP Request KIE AI (upload immagine + submit video). Attenzione: l'URL di upload usa un dominio differente (<code>kieai.redpandaai.co</code>).
+        </div>
+        <div class="prereq-item">
+          <strong>Account KIE AI con crediti</strong>
+          La generazione video Veo 3.1 consuma crediti API. Verifica il saldo su <a href="https://kie.ai/dashboard" target="_blank">kie.ai/dashboard</a>.
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. CONFIGURAZIONE -->
+    <section id="configurazione">
+      <div class="section-title">5. Configurazione prima dell'uso</div>
+      <ol class="step-list">
+        <li>Importa <code>video-veo31-kie-ai.json</code> in n8n (<em>Workflow → Import from file</em>)</li>
+        <li>Crea una credenziale <strong>OpenAI API</strong> con la tua chiave <code>sk-...</code> e collegala al nodo <strong>OpenAI Chat Model</strong></li>
+        <li>Apri il nodo <strong>HTTP Request</strong> (upload immagine) e imposta il Bearer token nell'header Authorization con la tua chiave KIE AI: <code>Bearer KIE_YOUR_API_KEY</code></li>
+        <li>Apri il nodo <strong>Submit_Veo_task</strong> e imposta lo stesso Bearer token nell'header Authorization</li>
+        <li>Apri il nodo <strong>HTTP Request1</strong> (status check) e imposta lo stesso Bearer token</li>
+        <li>Rimuovi il <strong>pin data</strong> dal nodo <strong>Basic LLM Chain</strong> e dal nodo <strong>Merge</strong> (click destro sul nodo → "Unpin") per consentire l'esecuzione reale</li>
+        <li>Attiva il workflow → n8n genera l'URL pubblico del form — condividilo o aprilo in un browser</li>
+        <li>Compila il form con descrizione, stile e immagine prodotto → osserva l'esecuzione in n8n</li>
+      </ol>
+      <div class="warn-box"><strong>Credenziali nei nodi HTTP:</strong> questo workflow usa il pattern manuale (header hardcoded nel nodo) invece delle credenziali n8n native. Il Bearer token è visibile nel JSON. Nel file sanitizzato del repository il valore è già rimosso — inserisci la tua chiave solo in n8n, non nel file JSON committato.</div>
+    </section>
+
+    <!-- 6. CONCETTI CHIAVE -->
+    <section id="concetti">
+      <div class="section-title">6. Concetti chiave appresi</div>
+
+      <p><strong>Polling loop in n8n:</strong> quando un'API esterna è asincrona (restituisce un task ID invece del risultato immediato), il pattern standard è: submit → wait → check → if done: fine, else: wait again. In n8n si implementa con Wait + HTTP Request + If con il ramo False che torna al nodo HTTP.</p>
+
+      <p><strong>Estrazione dati binari da form:</strong> quando un Form Trigger riceve un file, il contenuto arriva nel campo <code>binary</code> dell'item, non nel <code>json</code>. Per accedervi serve un nodo Code che usa <code>item.binary[fieldName].data</code>. L'approccio di questo workflow (iterare i <code>binaryKeys</code> senza hardcodare il nome) è più robusto di accedere direttamente al nome del campo.</p>
+
+      <p><strong>Pin data per sviluppo:</strong> i nodi con pin data saltano l'esecuzione reale e usano i dati salvati. È utile in fase di test per non consumare crediti API ad ogni esecuzione. In produzione va sempre rimosso. Il nodo LLM Chain e il nodo Merge in questo workflow hanno pin data attivi — segno che il workflow è stato debuggato prima del deploy finale.</p>
+
+      <p><strong>REFERENCE_2_VIDEO:</strong> la modalità di generazione che usa un'immagine di riferimento per guidare il video è la funzionalità differenziante di questo workflow rispetto a una generazione video text-only. Richiede che l'immagine sia disponibile come URL pubblico — da qui il passaggio di upload intermedio su un server KIE AI temporaneo.</p>
+
+      <div class="key-box"><strong>Estensione suggerita:</strong> aggiungere dopo il nodo If (output True) un nodo che invia l'URL del video via email o Telegram. La risposta dell'API KIE AI al completamento dovrebbe contenere <code>data.videoUrl</code> o simile — controlla la documentazione <a href="https://kie.ai/docs" target="_blank">kie.ai/docs</a> per il campo esatto da estrarre.</div>
+    </section>
+
+    <div style="border-top:1px solid var(--gray-200);padding-top:24px;color:var(--gray-500);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <span>Workflow: Video VEO3.1 KIE AI · ID n8n: ZIF33JHTseYS3iSg</span>
+      <span>Pietro Cammise — <a href="https://github.com/Auticad" style="color:var(--teal)">github.com/Auticad</a></span>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

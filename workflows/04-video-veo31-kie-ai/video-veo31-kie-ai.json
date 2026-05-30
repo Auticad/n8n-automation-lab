@@ -1,0 +1,298 @@
+{
+  "name": "Video VEO3.1 KIE AI Final",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Generatore di video marketing",
+        "formDescription": "Raccolta dati per il video",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Descrivi il video",
+              "fieldType": "textarea",
+              "placeholder": "Inserisci qui come intendi realizzare il video",
+              "defaultValue": "es: uno sportivo corre con la borraccia \"Extreme\"",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Seleziona uno stile",
+              "fieldType": "dropdown",
+              "defaultValue": "Realismo cinematografico",
+              "fieldOptions": {
+                "values": [
+                  { "option": "Realismo cinematografico" },
+                  { "option": "Iperrealismo" },
+                  { "option": "Animazione stilizzata" },
+                  { "option": "Stile documentaristico" },
+                  { "option": "Estetica futuristica" }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Carica immagine del prodotto",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [-496, 80],
+      "id": "16ed94cf-8155-4b23-b6b2-1c3c6502800a",
+      "name": "On form submission",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Genera un prompt video professionale basato su questi dati:\n- Descrizione: {{ $json['Descrivi il video'] }}\n- Stile: {{ $json['Seleziona uno stile'] }}\n\nIl prompt deve seguire questa struttura: [Soggetto e Azione] + [Ambiente/Background] + [Movimento Camera] + [Illuminazione e Colore] + [Qualità Tecnica].\n\nNOTA: Genera un prompt video per Veo 3.1. Non usare etichette come [Soggetto]. Scrivi il prompt come un unico paragrafo descrittivo. Scrivi esclusivamente in lingua INGLESE. Segui questa struttura logica: Soggetto -> Ambiente -> Movimento Camera -> Luci -> Dettagli Tecnici.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [128, 80],
+      "id": "8da3ccb6-8745-4514-8f25-39481db0ff5f",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": { "__rl": true, "value": "gpt-4o", "mode": "list", "cachedResultName": "gpt-4o" },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [80, 304],
+      "id": "e028679e-6165-4069-b95c-07528f9e5922",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_API_CREDENTIAL_ID",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [704, -32],
+      "id": "b0ebe878-d3a9-4422-a707-5f7f19eedd86",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/veo/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer YOUR_KIE_AI_API_KEY" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.prompt }}\",\n  \"imageUrls\": [\n    \"{{ $json.data.downloadUrl }}\"\n  ],\n  \"model\": \"veo3_fast\",\n  \"aspectRatio\": \"16:9\",\n  \"seeds\": 12345,\n  \"enableFallback\": false,\n  \"enableTranslation\": true,\n  \"generationType\": \"REFERENCE_2_VIDEO\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [944, -32],
+      "id": "fa870f30-662c-475f-91a6-c40b0d938a69",
+      "name": "Submit_Veo_task"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "b9c96119-0610-4a93-b458-be8becd6ec70", "name": "prompt", "value": "={{ $json.text }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [480, 80],
+      "id": "1a6d7977-f827-4456-9026-e0b20f5c97c5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": { "amount": 60 },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1376, 224],
+      "id": "5ac0d85f-8b31-4f63-a446-0dc299a6cf76",
+      "name": "Wait_60s",
+      "webhookId": "YOUR_WAIT_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/veo/record-info",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "taskId", "value": "={{ $json.data.taskId }}" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer YOUR_KIE_AI_API_KEY" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [1168, -32],
+      "id": "61cd90c5-3031-4666-834d-463c4ddca58f",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kieai.redpandaai.co/api/file-base64-upload",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer YOUR_KIE_AI_API_KEY" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "base64Data", "value": "={{ $json.base64_string }}" },
+            { "name": "uploadPath", "value": "images/base64" },
+            { "name": "fileName", "value": "immagine_campione.png" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [208, -144],
+      "id": "a350089b-fb06-4732-b733-c70298871be1",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Trova automaticamente il primo file binario disponibile\nfor (const item of $input.all()) {\n  const binaryKeys = Object.keys(item.binary || {});\n  if (binaryKeys.length > 0) {\n    const firstBinaryKey = binaryKeys[0];\n    const binaryData = item.binary[firstBinaryKey];\n    item.json.base64_string = binaryData.data;\n    item.json.mime_type = binaryData.mimeType;\n    item.json.original_field_name = firstBinaryKey;\n  } else {\n    item.json.error_debug = \"Nessun dato binario trovato. Assicurati di aver eseguito il Form Trigger con un file caricato.\";\n  }\n}\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-144, -144],
+      "id": "de950ffd-5f72-42b9-becc-039b44dea7c6",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3a3dc720-0c0e-4d44-8e32-82fc2d8a7ac6",
+              "leftValue": "={{ $json.data.completeTime }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "notEmpty", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [1376, -32],
+      "id": "b6f3d580-f89f-4eb6-b5d5-e7ad7f0891e5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.response.resultUrls[0] }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [1600, -32],
+      "id": "c3a1f2e4-7b89-4d56-a210-8f3e9c2d1a05",
+      "name": "Download Video"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "Video generato con Veo3.1",
+        "emailType": "html",
+        "message": "Video generato con Veo3.1",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "data"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [1808, -32],
+      "id": "d7f4a3b2-1e56-4c89-b234-9a8f7e6d5c12",
+      "name": "Send a message",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [[
+        { "node": "Basic LLM Chain", "type": "main", "index": 0 },
+        { "node": "Code in JavaScript", "type": "main", "index": 0 }
+      ]]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{ "node": "Basic LLM Chain", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Basic LLM Chain": { "main": [[{ "node": "Edit Fields", "type": "main", "index": 0 }]] },
+    "Edit Fields": { "main": [[{ "node": "Merge", "type": "main", "index": 1 }]] },
+    "Code in JavaScript": { "main": [[{ "node": "HTTP Request", "type": "main", "index": 0 }]] },
+    "HTTP Request": { "main": [[{ "node": "Merge", "type": "main", "index": 0 }]] },
+    "Merge": { "main": [[{ "node": "Submit_Veo_task", "type": "main", "index": 0 }]] },
+    "Submit_Veo_task": { "main": [[{ "node": "HTTP Request1", "type": "main", "index": 0 }]] },
+    "HTTP Request1": { "main": [[{ "node": "If", "type": "main", "index": 0 }]] },
+    "If": {
+      "main": [
+        [{ "node": "Download Video", "type": "main", "index": 0 }],
+        [{ "node": "Wait_60s", "type": "main", "index": 0 }]
+      ]
+    },
+    "Wait_60s": { "main": [[{ "node": "HTTP Request1", "type": "main", "index": 0 }]] },
+    "Download Video": { "main": [[{ "node": "Send a message", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "ZIF33JHTseYS3iSg",
+  "tags": []
+}
