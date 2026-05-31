@@ -40,7 +40,7 @@
         "options": {}
       },
       "type": "n8n-nodes-base.formTrigger",
-      "typeVersion": 2.3,
+      "typeVersion": 2.5,
       "position": [-496, 80],
       "id": "16ed94cf-8155-4b23-b6b2-1c3c6502800a",
       "name": "On form submission",
@@ -53,7 +53,7 @@
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.7,
+      "typeVersion": 1.9,
       "position": [128, 80],
       "id": "8da3ccb6-8745-4514-8f25-39481db0ff5f",
       "name": "Basic LLM Chain"
@@ -100,11 +100,11 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"prompt\": \"{{ $json.prompt }}\",\n  \"imageUrls\": [\n    \"{{ $json.data.downloadUrl }}\"\n  ],\n  \"model\": \"veo3_fast\",\n  \"aspectRatio\": \"16:9\",\n  \"seeds\": 12345,\n  \"enableFallback\": false,\n  \"enableTranslation\": true,\n  \"generationType\": \"REFERENCE_2_VIDEO\"\n}",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.prompt }}\",\n  \"imageUrls\": [\n    \"{{ $json.data.downloadUrl }}\"\n  ],\n  \"model\": \"veo3_fast\",\n  \"aspect_ratio\": \"16:9\",\n  \"enableFallback\": false,\n  \"enableTranslation\": true,\n  \"generationType\": \"REFERENCE_2_VIDEO\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
+      "typeVersion": 4.4,
       "position": [944, -32],
       "id": "fa870f30-662c-475f-91a6-c40b0d938a69",
       "name": "Submit_Veo_task"
@@ -151,7 +151,7 @@
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
+      "typeVersion": 4.4,
       "position": [1168, -32],
       "id": "61cd90c5-3031-4666-834d-463c4ddca58f",
       "name": "HTTP Request1"
@@ -169,7 +169,7 @@
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
-            { "name": "base64Data", "value": "={{ $json.base64_string }}" },
+            { "name": "base64Data", "value": "=data:image/png;base64,{{ $json.base64_string }}" },
             { "name": "uploadPath", "value": "images/base64" },
             { "name": "fileName", "value": "immagine_campione.png" }
           ]
@@ -177,14 +177,14 @@
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
+      "typeVersion": 4.4,
       "position": [208, -144],
       "id": "a350089b-fb06-4732-b733-c70298871be1",
       "name": "HTTP Request"
     },
     {
       "parameters": {
-        "jsCode": "// Trova automaticamente il primo file binario disponibile\nfor (const item of $input.all()) {\n  const binaryKeys = Object.keys(item.binary || {});\n  if (binaryKeys.length > 0) {\n    const firstBinaryKey = binaryKeys[0];\n    const binaryData = item.binary[firstBinaryKey];\n    item.json.base64_string = binaryData.data;\n    item.json.mime_type = binaryData.mimeType;\n    item.json.original_field_name = firstBinaryKey;\n  } else {\n    item.json.error_debug = \"Nessun dato binario trovato. Assicurati di aver eseguito il Form Trigger con un file caricato.\";\n  }\n}\nreturn $input.all();"
+        "jsCode": "// Legge i byte reali del file binario dal filesystem interno di n8n\n// (necessario con binaryMode 'separate': item.binary[key].data NON contiene il base64)\nconst items = [];\n\nfor (let i = 0; i < $input.all().length; i++) {\n  const item = $input.all()[i];\n  const binaryKeys = Object.keys(item.binary || {});\n\n  if (binaryKeys.length === 0) {\n    items.push({\n      json: {\n        ...item.json,\n        error_debug: \"Nessun dato binario trovato. Assicurati di aver eseguito il Form Trigger con un file caricato.\"\n      }\n    });\n    continue;\n  }\n\n  const firstKey = binaryKeys[0];\n  const buffer = await this.helpers.getBinaryDataBuffer(i, firstKey);\n  const base64 = buffer.toString('base64');\n  const mimeType = item.binary[firstKey].mimeType;\n\n  items.push({\n    json: {\n      ...item.json,\n      base64_string: base64,\n      mime_type: mimeType,\n      original_field_name: firstKey\n    }\n  });\n}\n\nreturn items;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -231,7 +231,7 @@
         }
       },
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
+      "typeVersion": 4.4,
       "position": [1600, -32],
       "id": "c3a1f2e4-7b89-4d56-a210-8f3e9c2d1a05",
       "name": "Download Video"
@@ -263,6 +263,42 @@
           "name": "Gmail account"
         }
       }
+    },
+    {
+      "parameters": {
+        "content": "## POST\nBase64 File Upload\nCarica l'immagine su KIE AI e ottiene downloadUrl\n\nhttps://kie.ai",
+        "height": 140,
+        "width": 240
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [144, -320],
+      "id": "a1111111-1111-4111-8111-111111111111",
+      "name": "Sticky Note Upload"
+    },
+    {
+      "parameters": {
+        "content": "## POST\nGenera video VEO3.1\nModalità REFERENCE_2_VIDEO\n\nhttps://kie.ai",
+        "height": 140,
+        "width": 240
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [896, -208],
+      "id": "a2222222-2222-4222-8222-222222222222",
+      "name": "Sticky Note Generate"
+    },
+    {
+      "parameters": {
+        "content": "## GET\nDettagli video VEO3.1 (polling)\nVerifica completeTime\n\nhttps://kie.ai",
+        "height": 140,
+        "width": 240
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1152, -208],
+      "id": "a3333333-3333-4333-8333-333333333333",
+      "name": "Sticky Note Poll"
     }
   ],
   "connections": {

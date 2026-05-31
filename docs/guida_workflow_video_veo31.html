@@ -415,20 +415,35 @@
             <tr><td>Linguaggio</td><td>JavaScript</td></tr>
             <tr><td>Output</td><td><code>base64_string</code>, <code>mime_type</code>, <code>original_field_name</code></td></tr>
           </table>
-          <pre>for (const item of $input.all()) {
+          <pre>// Legge i byte reali del file dal filesystem interno di n8n
+const items = [];
+
+for (let i = 0; i &lt; $input.all().length; i++) {
+  const item = $input.all()[i];
   const binaryKeys = Object.keys(item.binary || {});
-  if (binaryKeys.length > 0) {
-    const firstBinaryKey = binaryKeys[0];
-    const binaryData = item.binary[firstBinaryKey];
-    item.json.base64_string = binaryData.data;
-    item.json.mime_type = binaryData.mimeType;
-    item.json.original_field_name = firstBinaryKey;
-  } else {
-    item.json.error_debug = "Nessun dato binario trovato.";
+
+  if (binaryKeys.length === 0) {
+    items.push({ json: { ...item.json, error_debug: "Nessun dato binario trovato." } });
+    continue;
   }
+
+  const firstKey = binaryKeys[0];
+  const buffer = await this.helpers.getBinaryDataBuffer(i, firstKey);
+  const base64 = buffer.toString('base64');
+  const mimeType = item.binary[firstKey].mimeType;
+
+  items.push({
+    json: {
+      ...item.json,
+      base64_string: base64,
+      mime_type: mimeType,
+      original_field_name: firstKey
+    }
+  });
 }
-return $input.all();</pre>
-          <div class="info-box">Il codice trova automaticamente il primo campo binario nell'item senza hardcodare il nome del campo. Questo lo rende robusto anche se il nome del campo nel form cambia. L'estrazione produce <code>base64_string</code> che viene passato al nodo HTTP successivo.</div>
+
+return items;</pre>
+          <div class="info-box"><strong>Importante:</strong> con <code>binaryMode: "separate"</code> (n8n salva i binari su filesystem) il campo <code>item.binary[key].data</code> non contiene il base64 ma solo un riferimento interno. Per i byte reali serve <code>await this.helpers.getBinaryDataBuffer(i, key)</code> seguito da <code>.toString('base64')</code>. Il codice trova da solo il primo campo binario, quindi resta valido anche se il nome del campo nel form cambia.</div>
         </div>
       </div>
 
@@ -445,7 +460,7 @@ return $input.all();</pre>
             <tr><td>Metodo</td><td>POST</td></tr>
             <tr><td>URL</td><td><code>https://kieai.redpandaai.co/api/file-base64-upload</code></td></tr>
             <tr><td>Auth</td><td>Bearer token (header Authorization)</td></tr>
-            <tr><td>Body param: base64Data</td><td><code>={{ $json.base64_string }}</code></td></tr>
+            <tr><td>Body param: base64Data</td><td><code>=data:image/png;base64,{{ $json.base64_string }}</code></td></tr>
             <tr><td>Body param: uploadPath</td><td><code>images/base64</code></td></tr>
             <tr><td>Body param: fileName</td><td><code>immagine_campione.png</code></td></tr>
           </table>
@@ -524,8 +539,7 @@ return $input.all();</pre>
             <tr><td>URL</td><td><code>https://api.kie.ai/api/v1/veo/generate</code></td></tr>
             <tr><td>Auth</td><td>Bearer token (header Authorization)</td></tr>
             <tr><td>model</td><td><code>veo3_fast</code></td></tr>
-            <tr><td>aspectRatio</td><td><code>16:9</code></td></tr>
-            <tr><td>seeds</td><td><code>12345</code> (riproducibilità)</td></tr>
+            <tr><td>aspect_ratio</td><td><code>16:9</code></td></tr>
             <tr><td>generationType</td><td><code>REFERENCE_2_VIDEO</code></td></tr>
             <tr><td>enableFallback</td><td><code>false</code></td></tr>
             <tr><td>enableTranslation</td><td><code>true</code></td></tr>
@@ -535,8 +549,7 @@ return $input.all();</pre>
   "prompt": "{{ $json.prompt }}",
   "imageUrls": ["{{ $json.data.downloadUrl }}"],
   "model": "veo3_fast",
-  "aspectRatio": "16:9",
-  "seeds": 12345,
+  "aspect_ratio": "16:9",
   "enableFallback": false,
   "enableTranslation": true,
   "generationType": "REFERENCE_2_VIDEO"
@@ -703,12 +716,4 @@ return $input.all();</pre>
       <div class="key-box"><strong>Estensione suggerita:</strong> aggiungere dopo il nodo If (output True) un nodo che invia l'URL del video via email o Telegram. La risposta dell'API KIE AI al completamento dovrebbe contenere <code>data.videoUrl</code> o simile — controlla la documentazione <a href="https://kie.ai/docs" target="_blank">kie.ai/docs</a> per il campo esatto da estrarre.</div>
     </section>
 
-    <div style="border-top:1px solid var(--gray-200);padding-top:24px;color:var(--gray-500);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-      <span>Workflow: Video VEO3.1 KIE AI · ID n8n: ZIF33JHTseYS3iSg</span>
-      <span>Pietro Cammise — <a href="https://github.com/Auticad" style="color:var(--teal)">github.com/Auticad</a></span>
-    </div>
-
-  </div>
-</div>
-</body>
-</html>
+    <div style="border-top:1px solid var(--gray
