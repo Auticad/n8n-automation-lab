@@ -1,0 +1,713 @@
+{
+  "name": "05 — Webhook Gemini Classifier",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook-gemini-classifier",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-800, 0],
+      "id": "node-webhook-trigger",
+      "name": "Webhook_Trigger",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "enrich-received-at",
+              "name": "received_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "enrich-retry-count",
+              "name": "retry_count",
+              "value": 0,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-560, 0],
+      "id": "node-set-enrich",
+      "name": "Set_Enrich"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code_ValidateTruncate — adattato per n8n Code node v2\n// In n8n il webhook espone body in $json.body e header in $json.headers\nconst body = $input.first().json.body;\nconst headers = $input.first().json.headers || {};\nconst contentType = (headers['content-type'] || headers['Content-Type'] || '').toLowerCase();\nconst receivedAt = $input.first().json.received_at;\nconst retryCount = $input.first().json.retry_count || 0;\n\n// Requirement 1.6: controlla Content-Type\nif (!contentType.includes('application/json')) {\n  return [{\n    json: {\n      statusCode: 415,\n      body: { error: 'unsupported_media_type' },\n      _error: true,\n      _errorCode: 415\n    }\n  }];\n}\n\n// Requirement 2.2: valida che il body sia un oggetto JSON (non null, non stringa)\nif (body === null || body === undefined) {\n  return [{\n    json: {\n      statusCode: 400,\n      body: { error: 'invalid_payload', detail: 'Body is null or undefined' },\n      _error: true,\n      _errorCode: 400\n    }\n  }];\n}\n\nif (typeof body === 'string') {\n  return [{\n    json: {\n      statusCode: 400,\n      body: { error: 'invalid_payload', detail: 'Body is a string, not an object' },\n      _error: true,\n      _errorCode: 400\n    }\n  }];\n}\n\nif (typeof body !== 'object') {\n  return [{\n    json: {\n      statusCode: 400,\n      body: { error: 'invalid_payload', detail: `Body is ${typeof body}, not an object` },\n      _error: true,\n      _errorCode: 400\n    }\n  }];\n}\n\n// Requirement 2.4, 2.5: serializza e tronca a 10000 se necessario\nlet payloadRaw = JSON.stringify(body);\nlet truncated = false;\n\nif (payloadRaw.length > 10000) {\n  payloadRaw = payloadRaw.substring(0, 10000);\n  truncated = true;\n}\n\n// Caso ok: restituisce il payload arricchito con received_at e retry_count\nreturn [{\n  json: {\n    payload: body,\n    payload_raw: payloadRaw,\n    received_at: receivedAt,\n    retry_count: retryCount,\n    truncated: truncated,\n    _error: false\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-320, 0],
+      "id": "node-code-validate",
+      "name": "Code_ValidateTruncate"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-error-flag",
+              "leftValue": "={{ $json._error }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-80, 0],
+      "id": "node-if-route-errors",
+      "name": "If_Route_Errors"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-415",
+              "leftValue": "={{ $json._errorCode }}",
+              "rightValue": 415,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [160, 200],
+      "id": "node-if-is415",
+      "name": "If_Is415"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_GEMINI_API_KEY",
+        "authentication": "none",
+        "sendHeaders": false,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\"contents\":[{\"parts\":[{\"text\":$json.payload_raw}]}],\"systemInstruction\":{\"parts\":[{\"text\":\"Sei un classificatore JSON. Rispondi SOLO con un oggetto JSON valido senza testo aggiuntivo, senza markdown, senza backtick. Usa esattamente questi campi: category (uno tra: informational, transactional, error, alert, other), confidence (numero decimale tra 0.0 e 1.0), summary (stringa max 200 caratteri).\"}]}}) }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json",
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [400, 0],
+      "id": "node-http-gemini",
+      "name": "HTTP_Classifier_Gemini",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-80, 200],
+      "id": "node-respond-400",
+      "name": "Respond_400"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "responseCode": 415
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-80, 360],
+      "id": "node-respond-415",
+      "name": "Respond_415"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose", "version": 3 },
+          "conditions": [
+            {
+              "id": "check-429",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 429,
+              "operator": { "type": "number", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [640, 0],
+      "id": "node-if-route-status",
+      "name": "If_Route_By_Status"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose", "version": 3 },
+          "conditions": [
+            {
+              "id": "check-candidates",
+              "leftValue": "={{ $json.body.candidates !== undefined && $json.body.candidates !== null }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [640, -200],
+      "id": "node-if-gemini-ok",
+      "name": "If_Is_Gemini_OK"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "increment-retry",
+              "name": "retry_count",
+              "value": "={{ $json.retry_count + 1 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [880, 200],
+      "id": "node-set-increment",
+      "name": "Set_Increment_Counter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose", "version": 3 },
+          "conditions": [
+            {
+              "id": "check-retry-limit",
+              "leftValue": "={{ $json.retry_count }}",
+              "rightValue": 3,
+              "operator": { "type": "number", "operation": "lt" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [1120, 200],
+      "id": "node-if-retry-limit",
+      "name": "If_Check_Retry_Limit"
+    },
+    {
+      "parameters": { "amount": 60, "unit": "seconds" },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1360, 200],
+      "id": "node-wait-60s",
+      "name": "Wait_60s",
+      "webhookId": "YOUR_WAIT_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "jsCode": "const VALID_CATEGORIES = ['informational', 'transactional', 'error', 'alert', 'other'];\n\n// Estrae i campi di contesto dallo stato precedente del workflow\nconst receivedAt = $input.first().json.received_at || new Date().toISOString();\nconst payloadRaw = $input.first().json.payload_raw || '';\nconst truncated = Boolean($input.first().json.truncated);\nconst retryCount = $input.first().json.retry_count || 0;\n\n// Estrae il testo dalla risposta Gemini\nlet rawText = '';\ntry {\n  const body = $input.first().json.body || $input.first().json;\n  rawText = body.candidates[0].content.parts[0].text;\n  rawText = rawText.replace(/^```json\\s*/i, '').replace(/^```\\s*/i, '').replace(/```\\s*$/, '').trim();\n} catch (e) {\n  return [{\n    json: {\n      _parseOk: false,\n      _parseError: true,\n      error_type: 'parse_error',\n      error_message: 'Cannot extract text from Gemini response: ' + e.message,\n      original: JSON.stringify($input.first().json),\n      received_at: receivedAt,\n      payload_raw: payloadRaw,\n      retry_count: retryCount,\n      truncated: truncated\n    }\n  }];\n}\n\n// Tenta il parsing JSON\nlet parsed;\ntry {\n  parsed = JSON.parse(rawText);\n} catch (_) {\n  return [{\n    json: {\n      _parseOk: false,\n      _parseError: true,\n      error_type: 'parse_error',\n      error_message: 'Gemini response is not valid JSON',\n      original: rawText,\n      received_at: receivedAt,\n      payload_raw: payloadRaw,\n      retry_count: retryCount,\n      truncated: truncated\n    }\n  }];\n}\n\n// Validazione\nconst { category, confidence, summary } = parsed || {};\n\nif (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {\n  return [{ json: { _parseOk: false, _parseError: true, error_type: 'parse_error', error_message: 'Parsed result is not an object', original: rawText, received_at: receivedAt, payload_raw: payloadRaw, retry_count: retryCount, truncated: truncated } }];\n}\nif (typeof category !== 'string' || !VALID_CATEGORIES.includes(category)) {\n  return [{ json: { _parseOk: false, _parseError: true, error_type: 'parse_error', error_message: 'Invalid category: ' + category, original: rawText, received_at: receivedAt, payload_raw: payloadRaw, retry_count: retryCount, truncated: truncated } }];\n}\nif (typeof confidence !== 'number' || !isFinite(confidence) || confidence < 0 || confidence > 1) {\n  return [{ json: { _parseOk: false, _parseError: true, error_type: 'parse_error', error_message: 'Invalid confidence: ' + confidence, original: rawText, received_at: receivedAt, payload_raw: payloadRaw, retry_count: retryCount, truncated: truncated } }];\n}\nif (typeof summary !== 'string' || summary.length > 200) {\n  return [{ json: { _parseOk: false, _parseError: true, error_type: 'parse_error', error_message: 'Invalid summary length: ' + (summary ? summary.length : 'undefined'), original: rawText, received_at: receivedAt, payload_raw: payloadRaw, retry_count: retryCount, truncated: truncated } }];\n}\n\nreturn [{\n  json: {\n    category: category,\n    confidence: confidence,\n    summary: summary,\n    received_at: receivedAt,\n    payload_raw: payloadRaw,\n    truncated: truncated,\n    retry_count: retryCount,\n    _parseOk: true\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0],
+      "id": "node-code-parse",
+      "name": "Code_ParseGeminiResponse"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose", "version": 3 },
+          "conditions": [
+            {
+              "id": "check-parse-ok",
+              "leftValue": "={{ $json._parseOk }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [1120, 0],
+      "id": "node-if-parse-ok",
+      "name": "If_Parse_Ok"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Classificazioni",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $json.received_at }}",
+            "category": "={{ $json.category }}",
+            "confidence": "={{ $json.confidence }}",
+            "summary": "={{ $json.summary }}",
+            "payload_raw": "={{ $json.payload_raw }}",
+            "truncated": "={{ $json.truncated }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "timestamp", "displayName": "timestamp", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "category", "displayName": "category", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "confidence", "displayName": "confidence", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "number", "readOnly": false, "removed": false },
+            { "id": "summary", "displayName": "summary", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "payload_raw", "displayName": "payload_raw", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "truncated", "displayName": "truncated", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "boolean", "readOnly": false, "removed": false }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1360, 0],
+      "id": "node-sheets-writer",
+      "name": "GoogleSheets_Writer_Classificazioni",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose", "version": 3 },
+          "conditions": [
+            {
+              "id": "check-sheets-error",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "empty", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [1600, 0],
+      "id": "node-if-sheets-ok",
+      "name": "If_Sheets_Ok"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'ok', category: $json.category, confidence: $json.confidence }) }}",
+        "options": { "responseCode": 200 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1840, 0],
+      "id": "node-respond-200",
+      "name": "Respond_200"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code_DeadLetter_RateLimit\n// Prepara i 4 campi per il tab Errors quando i retry sono esauriti (429)\nconst input = $input.first().json;\nconst payloadRaw = (input.payload_raw || JSON.stringify(input)).substring(0, 5000);\nreturn [{\n  json: {\n    timestamp: new Date().toISOString(),\n    error_type: 'rate_limit_exceeded',\n    error_message: 'Gemini rate limit: max retry attempts (3) exhausted',\n    payload_raw: payloadRaw,\n    // Preserva i campi di stato originali per il Respond a valle\n    _origin: 'rate_limit'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1360, 400],
+      "id": "node-code-deadletter-ratelimit",
+      "name": "Code_DeadLetter_RateLimit"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Errors",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $json.timestamp }}",
+            "error_type": "={{ $json.error_type }}",
+            "error_message": "={{ $json.error_message }}",
+            "payload_raw": "={{ $json.payload_raw }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "timestamp", "displayName": "timestamp", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "error_type", "displayName": "error_type", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "error_message", "displayName": "error_message", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "payload_raw", "displayName": "payload_raw", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1600, 400],
+      "id": "node-sheets-deadletter-ratelimit",
+      "name": "GoogleSheets_DeadLetter_RateLimit",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"error\":\"rate_limit_exceeded\"}",
+        "options": { "responseCode": 429 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1840, 400],
+      "id": "node-respond-429",
+      "name": "Respond_429"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code_DeadLetter_Parse\n// Prepara i 4 campi per il tab Errors quando il parsing della risposta Gemini fallisce\nconst input = $input.first().json;\nconst payloadRaw = (input.payload_raw || JSON.stringify(input)).substring(0, 5000);\nconst errorMsg = input.error_message || 'Gemini response could not be parsed as valid Classification_Result';\nreturn [{\n  json: {\n    timestamp: new Date().toISOString(),\n    error_type: 'parse_error',\n    error_message: errorMsg,\n    payload_raw: payloadRaw,\n    _origin: 'parse_error'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1360, -200],
+      "id": "node-code-deadletter-parse",
+      "name": "Code_DeadLetter_Parse"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Errors",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $json.timestamp }}",
+            "error_type": "={{ $json.error_type }}",
+            "error_message": "={{ $json.error_message }}",
+            "payload_raw": "={{ $json.payload_raw }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "timestamp", "displayName": "timestamp", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "error_type", "displayName": "error_type", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "error_message", "displayName": "error_message", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "payload_raw", "displayName": "payload_raw", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1600, -200],
+      "id": "node-sheets-deadletter-parse",
+      "name": "GoogleSheets_DeadLetter_Parse",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"error\":\"parse_error\"}",
+        "options": { "responseCode": 500 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1840, -200],
+      "id": "node-respond-500-parse",
+      "name": "Respond_500_Parse"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"error\":\"sheets_write_failed\"}",
+        "options": { "responseCode": 500 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1840, 200],
+      "id": "node-respond-500-sheets",
+      "name": "Respond_500_Sheets"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code_DeadLetter_Gemini\n// Prepara i 4 campi per il tab Errors per errori Gemini non-429 (es. 5xx, timeout)\nconst input = $input.first().json;\nconst payloadRaw = (input.payload_raw || JSON.stringify(input)).substring(0, 5000);\nconst httpCode = input.statusCode || input.error?.code || 'unknown';\nconst errorMsg = input.error?.message || input.message || ('Gemini returned unexpected status: ' + httpCode);\nreturn [{\n  json: {\n    timestamp: new Date().toISOString(),\n    error_type: 'gemini_error',\n    error_message: errorMsg,\n    payload_raw: payloadRaw,\n    _origin: 'gemini_error'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, -400],
+      "id": "node-code-deadletter-gemini",
+      "name": "Code_DeadLetter_Gemini"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Errors",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $json.timestamp }}",
+            "error_type": "={{ $json.error_type }}",
+            "error_message": "={{ $json.error_message }}",
+            "payload_raw": "={{ $json.payload_raw }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "timestamp", "displayName": "timestamp", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "error_type", "displayName": "error_type", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "error_message", "displayName": "error_message", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "payload_raw", "displayName": "payload_raw", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string", "readOnly": false, "removed": false }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1120, -400],
+      "id": "node-sheets-deadletter-gemini",
+      "name": "GoogleSheets_DeadLetter_Gemini",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"error\":\"gemini_error\"}",
+        "options": { "responseCode": 500 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1360, -400],
+      "id": "node-respond-500-gemini",
+      "name": "Respond_500_Gemini"
+    }
+  ],
+  "connections": {
+    "Webhook_Trigger": {
+      "main": [
+        [{ "node": "Set_Enrich", "type": "main", "index": 0 }]
+      ]
+    },
+    "Set_Enrich": {
+      "main": [
+        [{ "node": "Code_ValidateTruncate", "type": "main", "index": 0 }]
+      ]
+    },
+    "Code_ValidateTruncate": {
+      "main": [
+        [{ "node": "If_Route_Errors", "type": "main", "index": 0 }]
+      ]
+    },
+    "If_Route_Errors": {
+      "main": [
+        [{ "node": "If_Is415", "type": "main", "index": 0 }],
+        [{ "node": "HTTP_Classifier_Gemini", "type": "main", "index": 0 }]
+      ]
+    },
+    "If_Is415": {
+      "main": [
+        [{ "node": "Respond_415", "type": "main", "index": 0 }],
+        [{ "node": "Respond_400", "type": "main", "index": 0 }]
+      ]
+    },
+    "HTTP_Classifier_Gemini": {
+      "main": [
+        [{ "node": "If_Route_By_Status", "type": "main", "index": 0 }]
+      ]
+    },
+    "If_Route_By_Status": {
+      "main": [
+        [{ "node": "Set_Increment_Counter", "type": "main", "index": 0 }],
+        [{ "node": "If_Is_Gemini_OK", "type": "main", "index": 0 }]
+      ]
+    },
+    "If_Is_Gemini_OK": {
+      "main": [
+        [{ "node": "Code_ParseGeminiResponse", "type": "main", "index": 0 }],
+        [{ "node": "Code_DeadLetter_Gemini", "type": "main", "index": 0 }]
+      ]
+    },
+    "Code_DeadLetter_Gemini": {
+      "main": [
+        [{ "node": "GoogleSheets_DeadLetter_Gemini", "type": "main", "index": 0 }]
+      ]
+    },
+    "GoogleSheets_DeadLetter_Gemini": {
+      "main": [
+        [{ "node": "Respond_500_Gemini", "type": "main", "index": 0 }]
+      ]
+    },
+    "Code_ParseGeminiResponse": {
+      "main": [
+        [{ "node": "If_Parse_Ok", "type": "main", "index": 0 }]
+      ]
+    },
+    "If_Parse_Ok": {
+      "main": [
+        [{ "node": "GoogleSheets_Writer_Classificazioni", "type": "main", "index": 0 }],
+        [{ "node": "Code_DeadLetter_Parse", "type": "main", "index": 0 }]
+      ]
+    },
+    "Code_DeadLetter_Parse": {
+      "main": [
+        [{ "node": "GoogleSheets_DeadLetter_Parse", "type": "main", "index": 0 }]
+      ]
+    },
+    "GoogleSheets_DeadLetter_Parse": {
+      "main": [
+        [{ "node": "Respond_500_Parse", "type": "main", "index": 0 }]
+      ]
+    },
+    "GoogleSheets_Writer_Classificazioni": {
+      "main": [
+        [{ "node": "If_Sheets_Ok", "type": "main", "index": 0 }]
+      ]
+    },
+    "If_Sheets_Ok": {
+      "main": [
+        [{ "node": "Respond_200", "type": "main", "index": 0 }],
+        [{ "node": "Respond_500_Sheets", "type": "main", "index": 0 }]
+      ]
+    },
+    "Set_Increment_Counter": {
+      "main": [
+        [{ "node": "If_Check_Retry_Limit", "type": "main", "index": 0 }]
+      ]
+    },
+    "If_Check_Retry_Limit": {
+      "main": [
+        [{ "node": "Wait_60s", "type": "main", "index": 0 }],
+        [{ "node": "Code_DeadLetter_RateLimit", "type": "main", "index": 0 }]
+      ]
+    },
+    "Code_DeadLetter_RateLimit": {
+      "main": [
+        [{ "node": "GoogleSheets_DeadLetter_RateLimit", "type": "main", "index": 0 }]
+      ]
+    },
+    "GoogleSheets_DeadLetter_RateLimit": {
+      "main": [
+        [{ "node": "Respond_429", "type": "main", "index": 0 }]
+      ]
+    },
+    "Wait_60s": {
+      "main": [
+        [{ "node": "HTTP_Classifier_Gemini", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "",
+    "timeout": 30
+  },
+  "pinData": {}
+}
